@@ -1,0 +1,2 @@
+D:\SVN_Code\1-WIP\12-User\HiepPD1\MPS_CRM\AccountManagement\obj\Debug\docker-compose.dcproj.CoreCompileInputs.cache
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\AccountManagement\obj\Debug\docker-compose.dcproj.CoreCompileInputs.cache

@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  accountmanagement:
+    image: ${DOCKER_REGISTRY}accountmanagement
+    build:
+      context: .
+      dockerfile: AccountManagement\Dockerfile

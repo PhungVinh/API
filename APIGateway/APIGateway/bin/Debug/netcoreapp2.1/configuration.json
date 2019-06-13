@@ -1,0 +1,926 @@
+﻿{
+  "ReRoutes": [
+    {
+      "DownstreamPathTemplate": "/api/Organization/GetOrganizationList",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50007
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/Organization/GetOrganizationList",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+
+    {
+      "DownstreamPathTemplate": "/api/Account/Login",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50002
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/account/login",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/GetUser",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50002
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/GetUser",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/AddUser",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50002
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/AddUser",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/GetUserById/{id}",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50002
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/GetUserById/{id}",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/GetMenuList",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50002
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/GetMenuList",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/EditUser",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50002
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/EditUser",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "PUT" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/GetAllCategory",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/GetAllCategory",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/ResetPass",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/ResetPass",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/CheckTokenResetPass",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/CheckTokenResetPass",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/ChangePassword",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/ChangePassword",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/LockUser",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/LockUser",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "PATCH" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/ActiveUser",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/ActiveUser",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "PATCH" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/DeleteUser/{id}",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/DeleteUser/{id}",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "DELETE" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/SearchUser/",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50002
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/SearchUser/",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/UpdateUser",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50002
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/UpdateUser",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Account/GetTblMenuSPs",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50001,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Account/GetTblMenuSPs",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/GetListVOCForm",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50003,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/GetListVOCForm",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/UpdateVocattributes",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50003,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/UpdateVocattributes",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/DeleteVocattributes",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50003,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/DeleteVocattributes",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/UpdateAttributeOptions",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50003,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/UpdateAttributeOptions",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/DeleteAttributeOptions",
+      "DownstreamScheme": "http",
+      //"DownstreamHost": "192.168.50.175",
+      //"DownstreamPort": 50003,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/DeleteAttributeOptions",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/AddAttribute",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/AddAttribute",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/UpdateAttribute",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/UpdateAttribute",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "Put" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/DeleteAttribute",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/DeleteAttribute",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "Delete" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/GetListFormCims",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/GetListFormCims",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "Get" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/AddFormCims",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/AddFormCims",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/UpdateFormCims",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/UpdateFormCims",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "Put" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/AddAttributeConstraint",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/AddAttributeConstraint",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/UpdateAttributeConstraint",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/UpdateAttributeConstraint",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "Put" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/GetListAttributes",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.175",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/GetListAttributes",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "Get" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/GetListDataType",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.176",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.176",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.176",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/GetListDataType",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "Get" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/GetListController",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.176",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.176",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.176",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/GetListController",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "Get" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/Attributes/GetListConstraintByCateCode",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.176",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.176",
+          "Port": 50003
+        },
+        {
+          "Host": "192.168.50.176",
+          "Port": 50003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Attributes/GetListConstraintByCateCode",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "Get" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    }
+  ],
+    "GlobalConfiguration": {
+        "RequestIdKey": "OcRequestId",
+        "AdministrationPath": "/administration"
+    }
+}

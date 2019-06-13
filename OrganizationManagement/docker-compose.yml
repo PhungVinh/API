@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  organizationmanagement:
+    image: ${DOCKER_REGISTRY}organizationmanagement
+    build:
+      context: .
+      dockerfile: OrganizationManagement\Dockerfile
