@@ -480,30 +480,52 @@ namespace AccountManagement.DataAccess
         /// Function delete Authority
         /// CreatedBy: HaiHM
         /// CreatedDate: 5/5/2019
+        /// ModifiedDate: 12/6/2019
+        /// ModifiedBody: xóa bảng trung gian
         /// </summary>
         /// <param name="idAuth">delete authority(isDelete = true)</param>
         /// <returns>true or false</returns>
         public bool DeleteAuthority(int idAuth)
         {
+            bool result = false;
             try
             {
-                TblAuthority auT = db.TblAuthority.Where(au => au.IsDelete == false && au.AuthorityId == idAuth).FirstOrDefault();
-                if (auT != null)
+                using (var ts = new TransactionScope())
                 {
-                    // change status here
-                    auT.IsDelete = true;
-                    db.Entry(auT).State = EntityState.Modified;
-                    db.SaveChanges();
-                    return true;
+                    TblAuthority auT = db.TblAuthority.Where(au => au.IsDelete == false && au.AuthorityId == idAuth).FirstOrDefault();
+                    if (auT != null)
+                    {
+                        // change status here
+                        auT.IsDelete = true;
+                        db.Entry(auT).State = EntityState.Modified;
+                        db.SaveChanges();
+
+                        List<TblAuthorityUser> lstAu = db.TblAuthorityUser.Where(au => au.AuthorityId == idAuth).ToList();
+                        if(lstAu != null)
+                        {
+                            if(lstAu.Count() > 0)
+                            {
+                                foreach(var item in lstAu)
+                                {
+                                    db.TblAuthorityUser.Remove(item);
+                                    db.SaveChanges();
+                                }
+                            }
+                        }
+                        result = true;
+                    }
+                    else
+                    {
+                        result = false;
+                    }
+                    ts.Complete();
                 }
-                else
-                {
-                    return false;
-                }
+                return result;
             }
             catch (Exception ex)
             {
-                throw ex;
+                Console.WriteLine(ex.Message);
+                return false;
             }
         }
 
@@ -899,9 +921,9 @@ namespace AccountManagement.DataAccess
                 var orgId = db.TblOrganizationUser.Where(x => x.UserId == userId).FirstOrDefault().OrganizationId;
                 if (orgId != null)
                 {
-                    var authIdAdmin = db.TblAuthority.Where(x => x.OrganizationId == orgId && x.AuthorityType == AccountConstant.Admin && x.IsDelete == false).FirstOrDefault().AuthorityId;
-                    if (authIdAdmin > 0)
+                    try
                     {
+                        var authIdAdmin = db.TblAuthority.Where(x => x.OrganizationId == orgId && x.AuthorityType == AccountConstant.Admin).FirstOrDefault().AuthorityId;
                         var userIdOfAdminGroup = db.TblAuthorityUser.Where(x => x.AuthorityId == authIdAdmin).ToList();
                         var isAdminUser = userIdOfAdminGroup.Where(x => x.UserId == userId).FirstOrDefault();
                         if (isAdminUser != null)
@@ -983,7 +1005,7 @@ namespace AccountManagement.DataAccess
                                             else
                                             {
                                                 roleDTO2.IsEncypt = menu.IsEncyption == true ? menu.IsEncyption : roleDTO2.IsEncypt;
-                                            }                                                                                       
+                                            }
                                             roleDTO2.IsShow = true;
                                             roleDTO2.IsShowAll = true;
                                             roleDTO2.IsAdd = true;
@@ -1050,10 +1072,10 @@ namespace AccountManagement.DataAccess
                                                 if (result.Count > 0)
                                                 {
                                                     RoleDTO roleDTO1 = new RoleDTO();
-                                                    
+
                                                     foreach (var item1 in result)
                                                     {
-                                                        roleDTO1 = accountCommon.JoinPermission(roleDTO1, item1);                                                      
+                                                        roleDTO1 = accountCommon.JoinPermission(roleDTO1, item1);
                                                     }
                                                     roleDTO1.MenuName = item.MenuName;
                                                     roleDTO1.MenuCode = item.MenuCode;
@@ -1072,7 +1094,7 @@ namespace AccountManagement.DataAccess
                                                 var result1 = lstMenuRole.Where(x => x.MenuCode == item.MenuCode).ToList();
                                                 if (result1.Count > 0)
                                                 {
-                                                    RoleDTO roleDTO2 = new RoleDTO();                                                    
+                                                    RoleDTO roleDTO2 = new RoleDTO();
                                                     foreach (var item1 in result1)
                                                     {
                                                         roleDTO2 = accountCommon.JoinPermission(roleDTO2, item1);
@@ -1116,13 +1138,35 @@ namespace AccountManagement.DataAccess
                                                 lstRoleAll.AllRoles.Add(roleDTO);
                                                 lstRoleOutPut.Add(tblRoleViewModel2);
                                                 break;
+                                            case AccountConstant.MENU_OMS:
+                                                TblRoleViewModel tblRoleViewModel4 = new TblRoleViewModel();
+                                                tblRoleViewModel4.ParentName = db.TblMenu.Where(x => x.MenuCode == item.MenuCode).FirstOrDefault().MenuName;
+                                                tblRoleViewModel4.ParentCode = item.MenuCode;
+                                                var result4 = lstMenuRole.Where(x => x.MenuCode == item.MenuCode).ToList();
+                                                if (result4.Count > 0)
+                                                {
+                                                    RoleDTO roleDTO4 = new RoleDTO();
+                                                    foreach (var item1 in result4)
+                                                    {
+                                                        roleDTO4 = accountCommon.JoinPermission(roleDTO4, item1);
+                                                    }
+                                                    roleDTO4.MenuName = item.MenuName;
+                                                    roleDTO4.MenuCode = item.MenuCode;
+                                                    if (!accountCommon.IsRoleFalse(checkRoleFalse, roleDTO4))
+                                                    {
+                                                        tblRoleViewModel4.Roles.Add(roleDTO4);
+                                                        lstRoleAll.AllRoles.Add(roleDTO4);
+                                                        lstRoleOutPut.Add(tblRoleViewModel4);
+                                                    }
+                                                }
+                                                break;
                                             default:
                                                 if (lstRoleOutPut.Any(x => x.ParentCode == item.ParentCode))
                                                 {
                                                     var result3 = lstMenuRole.Where(x => x.MenuCode == item.MenuCode).ToList();
                                                     if (result3.Count > 0)
                                                     {
-                                                        RoleDTO roleDTO3 = new RoleDTO();                                                        
+                                                        RoleDTO roleDTO3 = new RoleDTO();
                                                         foreach (var item1 in result3)
                                                         {
                                                             roleDTO3 = accountCommon.JoinPermission(roleDTO3, item1);
@@ -1144,7 +1188,7 @@ namespace AccountManagement.DataAccess
                                                     var result3 = lstMenuRole.Where(x => x.MenuCode == item.MenuCode).ToList();
                                                     if (result3.Count > 0)
                                                     {
-                                                        RoleDTO roleDTO3 = new RoleDTO();                                                        
+                                                        RoleDTO roleDTO3 = new RoleDTO();
                                                         foreach (var item1 in result3)
                                                         {
                                                             roleDTO3 = accountCommon.JoinPermission(roleDTO3, item1);
@@ -1168,9 +1212,183 @@ namespace AccountManagement.DataAccess
                             return lstRoleAll;
                         }
                     }
-                    else
+                    catch (Exception)
                     {
-                        return AuthorityConstant.Error;
+                        var lstAuth = db.TblAuthority.Where(x => x.OrganizationId == orgId && x.AuthorityType != AccountConstant.Admin && x.AuthorityType != AccountConstant.SuperAdmin && x.IsDelete == false && x.IsLock == false).ToList();
+                        if (lstAuth.Count > 0)
+                        {
+                            var lstAuthUser = lstAuth.Where(x => db.TblAuthorityUser.Where(c => c.UserId == userId && x.IsLock == false && x.IsDelete == false).Select(c => c.AuthorityId).Contains(x.AuthorityId)).ToList();
+                            if (lstAuthUser.Count > 0)
+                            {
+                                foreach (var authUser in lstAuthUser)
+                                {
+                                    var result = db.TblRole.Where(x => x.AuthorityId == authUser.AuthorityId).ToList();
+                                    lstMenuRole.AddRange(result);
+                                    foreach (var role in result)
+                                    {
+                                        lstRole.Add(role.MenuCode);
+                                    }
+                                }
+                                lstRoleDistinct = lstRole.Distinct().ToList();
+                                var lstMenu = new List<TblMenu>();
+                                foreach (var menuCode in lstRoleDistinct)
+                                {
+                                    var result = db.TblMenu.Where(x => x.MenuCode == menuCode && x.IsDelete == false && x.IsActive == true).FirstOrDefault();
+                                    if (result != null)
+                                    {
+                                        lstMenu.Add(result);
+                                    }
+                                }
+                                foreach (var item in lstMenu)
+                                {
+                                    switch (item.MenuCode)
+                                    {
+                                        case AccountConstant.MENU_CATEGORY:
+                                            TblRoleViewModel tblRoleViewModel = new TblRoleViewModel();
+                                            tblRoleViewModel.ParentName = db.TblMenu.Where(x => x.MenuCode == item.MenuCode).FirstOrDefault().MenuName;
+                                            tblRoleViewModel.ParentCode = item.MenuCode;
+                                            var result = lstMenuRole.Where(x => x.MenuCode == item.MenuCode).ToList();
+                                            if (result.Count > 0)
+                                            {
+                                                RoleDTO roleDTO1 = new RoleDTO();
+
+                                                foreach (var item1 in result)
+                                                {
+                                                    roleDTO1 = accountCommon.JoinPermission(roleDTO1, item1);
+                                                }
+                                                roleDTO1.MenuName = item.MenuName;
+                                                roleDTO1.MenuCode = item.MenuCode;
+                                                if (!accountCommon.IsRoleFalse(checkRoleFalse, roleDTO1))
+                                                {
+                                                    tblRoleViewModel.Roles.Add(roleDTO1);
+                                                    lstRoleAll.AllRoles.Add(roleDTO1);
+                                                    lstRoleOutPut.Add(tblRoleViewModel);
+                                                }
+                                            }
+                                            break;
+                                        case AccountConstant.MENU_CIMS_LIST:
+                                            TblRoleViewModel tblRoleViewModel1 = new TblRoleViewModel();
+                                            tblRoleViewModel1.ParentName = db.TblMenu.Where(x => x.MenuCode == item.MenuCode).FirstOrDefault().MenuName;
+                                            tblRoleViewModel1.ParentCode = item.MenuCode;
+                                            var result1 = lstMenuRole.Where(x => x.MenuCode == item.MenuCode).ToList();
+                                            if (result1.Count > 0)
+                                            {
+                                                RoleDTO roleDTO2 = new RoleDTO();
+                                                foreach (var item1 in result1)
+                                                {
+                                                    roleDTO2 = accountCommon.JoinPermission(roleDTO2, item1);
+                                                }
+                                                roleDTO2.MenuName = item.MenuName;
+                                                roleDTO2.MenuCode = item.MenuCode;
+                                                if (!accountCommon.IsRoleFalse(checkRoleFalse, roleDTO2))
+                                                {
+                                                    tblRoleViewModel1.Roles.Add(roleDTO2);
+                                                    lstRoleAll.AllRoles.Add(roleDTO2);
+                                                    lstRoleOutPut.Add(tblRoleViewModel1);
+                                                }
+                                            }
+                                            break;
+                                        case AccountConstant.MENU_PROFILE:
+                                            TblRoleViewModel tblRoleViewModel2 = new TblRoleViewModel();
+                                            tblRoleViewModel2.ParentName = db.TblMenu.Where(x => x.MenuCode == item.MenuCode).FirstOrDefault().MenuName;
+                                            tblRoleViewModel2.ParentCode = item.MenuCode;
+                                            RoleDTO roleDTO = new RoleDTO();
+                                            roleDTO.MenuName = item.MenuName;
+                                            roleDTO.MenuCode = item.MenuCode;
+                                            roleDTO.IsEncypt = true;
+                                            roleDTO.IsShow = true;
+                                            roleDTO.IsShowAll = true;
+                                            roleDTO.IsAdd = true;
+                                            roleDTO.IsEdit = true;
+                                            roleDTO.IsEditAll = true;
+                                            roleDTO.IsDelete = true;
+                                            roleDTO.IsDeleteAll = true;
+                                            roleDTO.IsImport = true;
+                                            roleDTO.IsExport = true;
+                                            roleDTO.IsPrint = true;
+                                            roleDTO.IsApprove = true;
+                                            roleDTO.IsEnable = true;
+                                            roleDTO.IsPermission = true;
+                                            roleDTO.IsFirstExtend = true;
+                                            roleDTO.IsSecondExtend = true;
+                                            roleDTO.IsThirdExtend = true;
+                                            roleDTO.IsFouthExtend = true;
+                                            tblRoleViewModel2.Roles.Add(roleDTO);
+                                            lstRoleAll.AllRoles.Add(roleDTO);
+                                            lstRoleOutPut.Add(tblRoleViewModel2);
+                                            break;
+                                        case AccountConstant.MENU_OMS:
+                                            TblRoleViewModel tblRoleViewModel4 = new TblRoleViewModel();
+                                            tblRoleViewModel4.ParentName = db.TblMenu.Where(x => x.MenuCode == item.MenuCode).FirstOrDefault().MenuName;
+                                            tblRoleViewModel4.ParentCode = item.MenuCode;
+                                            var result4 = lstMenuRole.Where(x => x.MenuCode == item.MenuCode).ToList();
+                                            if (result4.Count > 0)
+                                            {
+                                                RoleDTO roleDTO4 = new RoleDTO();
+                                                foreach (var item1 in result4)
+                                                {
+                                                    roleDTO4 = accountCommon.JoinPermission(roleDTO4, item1);
+                                                }
+                                                roleDTO4.MenuName = item.MenuName;
+                                                roleDTO4.MenuCode = item.MenuCode;
+                                                if (!accountCommon.IsRoleFalse(checkRoleFalse, roleDTO4))
+                                                {
+                                                    tblRoleViewModel4.Roles.Add(roleDTO4);
+                                                    lstRoleAll.AllRoles.Add(roleDTO4);
+                                                    lstRoleOutPut.Add(tblRoleViewModel4);
+                                                }
+                                            }
+                                            break;
+                                        default:
+                                            if (lstRoleOutPut.Any(x => x.ParentCode == item.ParentCode))
+                                            {
+                                                var result3 = lstMenuRole.Where(x => x.MenuCode == item.MenuCode).ToList();
+                                                if (result3.Count > 0)
+                                                {
+                                                    RoleDTO roleDTO3 = new RoleDTO();
+                                                    foreach (var item1 in result3)
+                                                    {
+                                                        roleDTO3 = accountCommon.JoinPermission(roleDTO3, item1);
+                                                    }
+                                                    roleDTO3.MenuName = item.MenuName;
+                                                    roleDTO3.MenuCode = item.MenuCode;
+                                                    if (!accountCommon.IsRoleFalse(checkRoleFalse, roleDTO3))
+                                                    {
+                                                        lstRoleOutPut.Where(x => x.ParentCode == item.ParentCode).FirstOrDefault().Roles.Add(roleDTO3);
+                                                        lstRoleAll.AllRoles.Add(roleDTO3);
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                TblRoleViewModel tblRoleViewModel3 = new TblRoleViewModel();
+                                                tblRoleViewModel3.ParentName = db.TblMenu.Where(x => x.MenuCode == item.ParentCode).FirstOrDefault().MenuName;
+                                                tblRoleViewModel3.ParentCode = item.ParentCode;
+                                                var result3 = lstMenuRole.Where(x => x.MenuCode == item.MenuCode).ToList();
+                                                if (result3.Count > 0)
+                                                {
+                                                    RoleDTO roleDTO3 = new RoleDTO();
+                                                    foreach (var item1 in result3)
+                                                    {
+                                                        roleDTO3 = accountCommon.JoinPermission(roleDTO3, item1);
+                                                    }
+                                                    roleDTO3.MenuName = item.MenuName;
+                                                    roleDTO3.MenuCode = item.MenuCode;
+                                                    if (!accountCommon.IsRoleFalse(checkRoleFalse, roleDTO3))
+                                                    {
+                                                        tblRoleViewModel3.Roles.Add(roleDTO3);
+                                                        lstRoleAll.AllRoles.Add(roleDTO3);
+                                                        lstRoleOutPut.Add(tblRoleViewModel3);
+                                                    }
+                                                }
+                                            }
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        lstRoleAll.RoleModule = lstRoleOutPut;
+                        return lstRoleAll;
                     }
                 }
                 else
@@ -1187,6 +1405,9 @@ namespace AccountManagement.DataAccess
 
         /// <summary>
         ///  GetUsersToGrantAuthority method: Danh sách users để thêm mới vào nhóm quyền
+        ///  HaiHMl: 
+        ///  @Update Contain: loại superadmin khỏi danh sách phân quyền
+        ///  @Update date: 15/05/2019
         /// </summary>
         /// <param name="authorityId"></param>
         /// <returns>Danh sách users</returns>
@@ -1195,9 +1416,30 @@ namespace AccountManagement.DataAccess
             try
             {
                 // Lấy mã đơn vị
-                var orgId = db.TblOrganization.Where(x => x.OrganizationCode == orgCode).FirstOrDefault().OrganizationId;
+                var orgId = db.TblOrganization.Where(x => x.OrganizationCode == orgCode && x.IsDelete == false).FirstOrDefault().OrganizationId;
                 // Lấy tất cả user của đơn vị
-                var lstUser = db.TblUsers.Where(x => db.TblOrganizationUser.Where(c => c.OrganizationId == orgId && c.UserId == x.Id && x.IsLock == false && x.IsDelete == false).Select(c => c.UserId).Contains(x.Id)).ToList();
+                List<TblUsers> lstUserTemp = db.TblUsers.Where(x => db.TblOrganizationUser.Where(c => c.OrganizationId == orgId && c.UserId == x.Id && x.IsLock == false && x.IsDelete == false).Select(c => c.UserId).Contains(x.Id)).ToList();
+                // Lấy danh sách Superadmin
+                TblAuthority authoritySuperAdmin = db.TblAuthority.Where(x => x.AuthorityType == AccountConstant.SuperAdmin).FirstOrDefault();
+                List<TblUsers> lstUser = new List<TblUsers>();
+                if (authoritySuperAdmin != null)
+                {
+                    List<TblAuthorityUser> lstAU = db.TblAuthorityUser.Where(au => au.AuthorityId == authoritySuperAdmin.AuthorityId).ToList();
+                    if(lstAU != null && lstAU.Count > 0)
+                    {
+                        foreach(var item in lstUserTemp)
+                        {
+                            foreach(var lstSuperAdmin in lstAU)
+                            {
+                                if (item.Id != lstSuperAdmin.UserId)
+                                {
+                                    lstUser.Add(item);
+                                }
+
+                            }
+                        }
+                    }
+                }
                 // Lấy tất cả nhóm quyền của đơn vị
                 var lstAuth = db.TblAuthority.Where(x => x.OrganizationId == orgId).ToList();
                 // Lấy Id của nhóm quyền admin đơn vị
@@ -1241,9 +1483,10 @@ namespace AccountManagement.DataAccess
                     return new { Message = AuthorityConstant.ExceptionGetUsersToGrantAuthority };
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 //return "Error: Không có nhóm quyền này";
+                Console.WriteLine(ex.Message);
                 return AuthorityConstant.ExceptionGetUsersToGrantAuthority;
             }
         }

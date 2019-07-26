@@ -12,19 +12,19 @@ namespace AccountManagement.Repositories
     {
         TblUsers GetUsersLogin(string userName, string pw);
 
-        TblUsers GetUsersCustom(string userName, string orgCode);
+        TblUsers GetUsersCustom(string userName, string orgCode, int userIdLogin);
 
         TblUsers GetUsers(string userName);
 
         TblUsers GetUserById(int id);
 
-        int AddUser(UserAndOrgViewModel user);
+        int AddUser(UserAndOrgViewModel user, int userIdLogin);
 
-        int EditUser(UserAndOrgViewModel user);
+        int EditUser(UserAndOrgViewModel user, int userIdLogin);
 
-        int DeleteUser(int userID);
+        int DeleteUser(int userID, string username);
 
-        Task<object> SearchUser(string search);
+        Task<object> SearchUser(int userId, string strFilter);
 
         int ResetPassUser(TblUsers user);
 
@@ -40,9 +40,9 @@ namespace AccountManagement.Repositories
 
         List<TblAuthority> ListAuthorityOfUser(int userId);
 
-        int UpdateUser(TblUsers user, bool checkUpdateImage);
+        int UpdateUser(TblUsers user, bool checkUpdateImage, bool updatePass, bool checkResetSuccess, int userIdLogin);
 
-        Task<object> GetTblMenuParent();
+        object GetTblMenuParent(bool switchData);
 
         string GetStringCache(string cacheKey);
 
@@ -54,7 +54,7 @@ namespace AccountManagement.Repositories
 
         object GetMenuList(int userId);
 
-        object GetAllCategory(string CategoryTypeCode);
+        List<TblCategory> GetAllCategory(string CategoryTypeCode, string orgCode, string CategoryCode);
 
         object GetDepartment(string OrganizationCode);
 
@@ -73,6 +73,10 @@ namespace AccountManagement.Repositories
         bool CheckLoginAdminOrganization(string userName, string pw);
 
         byte[] GetImageAsync(string organizationCode, string imageFile);
+
+        string GenerateJSONWebTokenReset(TblUsers userInfo);
+
+        bool CheckTokenReset(string username, string codeReset);
 
     }
 }

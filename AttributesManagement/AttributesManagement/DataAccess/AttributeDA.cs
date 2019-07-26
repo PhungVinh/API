@@ -34,15 +34,15 @@ namespace AttributesManagement.DataAccess
         /// <param name="attributes"></param>
         /// <returns></returns>
         public object AddAttribute(InfoAttribute attributes)
-        {
+         {
             using (TransactionScope scope = new TransactionScope())
             {
                 try
                 {
                     int code = 0;
                     int num = 0;
-                    TblVocattributes addAttributes = new TblVocattributes();
-                    TblVocattributes checkCode = db.TblVocattributes.Where(v => v.IsDelete == false).LastOrDefault();
+                    TblAttributes addAttributes = new TblAttributes();
+                    TblAttributes checkCode = db.TblAttributes.Where(v => v.IsDelete == false).LastOrDefault();
                     if (checkCode == null)
                     {
                         num = 1;
@@ -57,7 +57,6 @@ namespace AttributesManagement.DataAccess
                     addAttributes.DefaultValue = attributes.DefaultValue;
                     addAttributes.IsCategory = attributes.IsCategory;
                     addAttributes.AttributeType = attributes.AttributeType;
-                    addAttributes.AttributeWidth = attributes.AttributeWidth;
                     addAttributes.AttributeLabel = attributes.AttributeLabel;
                     addAttributes.IsRequired = attributes.IsRequired;
                     addAttributes.IsTableShow = attributes.IsTableShow;
@@ -69,19 +68,38 @@ namespace AttributesManagement.DataAccess
                     addAttributes.DefaultValueWithTextBox = attributes.DefaultValueWithTextBox;
                     addAttributes.IsReuse = attributes.IsReuse;
                     addAttributes.CategoryParentCode = attributes.CategoryParentCode;
-                    //addAttributes.DefaultValue = attributes.CategoryParentCode != "" ? attributes.DefaultValue : "";
                     addAttributes.IsDelete = false;
                     addAttributes.Encyption = false;
                     addAttributes.EncyptWaiting = false;
                     addAttributes.IsSort = attributes.IsSort;
-                    addAttributes.ModuleParent = attributes.ModuleParent;
+                    addAttributes.ModuleParent = AttributeConstant.CIMS;
                     addAttributes.AttributeDescription = attributes.AttributeDescription;
-                    db.TblVocattributes.Add(addAttributes);
-                    code = db.SaveChanges();
+                    //thêm chức năng
+                    addAttributes.MaximumLength = attributes.MaximumLength;
+                    addAttributes.MinimumLength = attributes.MinimumLength;
+                    addAttributes.IsEnable = attributes.IsEnable;
+                    addAttributes.IsLinkFieldInformation = attributes.IsLinkFieldInformation;
+                    addAttributes.MaxValue = attributes.MaxValue;
+                    addAttributes.MinValue = attributes.MinValue;
+                    addAttributes.RuleInputValue = attributes.RuleInputValue;
+                    if (attributes.IsLinkFieldInformation.Value == true)
+                    {
+                        addAttributes.InputFieldValue = (attributes.InputFieldValue != "") ? attributes.InputFieldValue : "";
+                    }
+                    if (attributes.IsReuse == AttributeConstant.IsDependentValue)
+                    {
+                        AddDependentValue(attributes.DependentValues, addAttributes.AttributeCode, addAttributes.ModuleParent);
+                    }
+                    if (attributes.IsReuse == AttributeConstant.IsGeneratingValue)
+                    {
+                        AddGeneratingValue(attributes.GeneratingValues, addAttributes.AttributeCode, addAttributes.ModuleParent, addAttributes.IsReuse);
+                    }
                     if (attributes.DetailRefer.Count() > 0)
                     {
                         AddReferenceConstraint(attributes.DetailRefer, addAttributes.AttributeCode, addAttributes.ModuleParent);
                     }
+                    db.TblAttributes.Add(addAttributes);
+                    code = db.SaveChanges();
                     SetStringCache(AttributeConstant.Attributes_GetListAttributes, GetListAttributes(addAttributes.ModuleParent));
                     scope.Complete();
                     object objAttributes = new { code = code, Id = addAttributes.AttributesId };
@@ -92,7 +110,9 @@ namespace AttributesManagement.DataAccess
                     throw ex;
                 }
             }
+            
         }
+
         /// <summary>
         /// Update Attribute
         /// </summary>
@@ -104,7 +124,7 @@ namespace AttributesManagement.DataAccess
             {
                 try
                 {
-                    TblVocattributes checkData = db.TblVocattributes.Where(v => v.IsDelete == false && v.AttributeCode == attributes.AttributeCode).FirstOrDefault();
+                    TblAttributes checkData = db.TblAttributes.Where(v => v.IsDelete == false && v.AttributeCode == attributes.AttributeCode).FirstOrDefault();
                     object objAttributes = new object();
                     int code = 0;
                     if (checkData != null)
@@ -115,7 +135,6 @@ namespace AttributesManagement.DataAccess
                             checkData.AttributeLabel = attributes.AttributeLabel;
                             checkData.AttributeDescription = attributes.AttributeDescription;
                             checkData.DefaultValueWithTextBox = attributes.DefaultValueWithTextBox != null ? attributes.DefaultValueWithTextBox : null;
-                            checkData.AttributeWidth = attributes.AttributeWidth;
                             checkData.DataType = attributes.DataType;
                             checkData.DefaultValue = attributes.DefaultValue != null ? attributes.DefaultValue : null;
                             checkData.IsVisible = attributes.IsVisible;
@@ -126,33 +145,48 @@ namespace AttributesManagement.DataAccess
                             checkData.UpDateBy = attributes.UpDateBy;
                             checkData.CategoryParentCode = attributes.CategoryParentCode != null ? attributes.CategoryParentCode : null;
                             checkData.UpdateDate = DateTime.Now;
-                            //checkData.DefaultValue = attributes.CategoryParentCode != "" ? attributes.DefaultValue : "";
                             checkData.IsDelete = false;
                             checkData.ModuleParent = attributes.ModuleParent;
                             checkData.AttributeDescription = attributes.AttributeDescription;
-                            db.Entry(checkData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                            code = db.SaveChanges();
-
+                            //Thêm chức năng
+                            checkData.MaximumLength = attributes.MaximumLength;
+                            checkData.MinimumLength = attributes.MinimumLength;
+                            checkData.IsEnable = attributes.IsEnable;
+                            checkData.IsLinkFieldInformation = attributes.IsLinkFieldInformation;
+                            checkData.MaxValue = attributes.MaxValue;
+                            checkData.MinValue = attributes.MinValue;
+                            checkData.RuleInputValue = attributes.RuleInputValue;
+                            if (attributes.IsLinkFieldInformation.Value == true)
+                            {
+                                checkData.InputFieldValue = (attributes.InputFieldValue != "") ? attributes.InputFieldValue : "";
+                            }
+                            if (attributes.IsReuse == AttributeConstant.IsDependentValue)
+                            {
+                                AddDependentValue(attributes.DependentValues, checkData.AttributeCode, checkData.ModuleParent);
+                            }
+                            if (attributes.IsReuse == AttributeConstant.IsGeneratingValue)
+                            {
+                                AddGeneratingValue(attributes.GeneratingValues, checkData.AttributeCode, checkData.ModuleParent, checkData.IsReuse);
+                            }
                             if (attributes.DetailRefer.Count() > 0)
                             {
                                 AddReferenceConstraint(attributes.DetailRefer, checkData.AttributeCode, checkData.ModuleParent);
                             }
-                            SetStringCache(AttributeConstant.Attributes_GetListAttributes, GetListAttributes(attributes.ModuleParent));                            
+                            db.Entry(checkData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                            code = db.SaveChanges();
+                            SetStringCache(AttributeConstant.Attributes_GetListAttributes, GetListAttributes(attributes.ModuleParent));
                             objAttributes = new { code = code, Id = checkData.AttributesId };
                         }
                         else
                         {
-                            TblVocattributes checkAttributeName = db.TblVocattributes.Where(v => v.AttributeLabel.ToLower() == attributes.AttributeLabel.ToLower() && v.IsDelete == false).FirstOrDefault();
+                            TblAttributes checkAttributeName = db.TblAttributes.Where(v => v.AttributeLabel.ToLower() == attributes.AttributeLabel.ToLower() && v.IsDelete == false).FirstOrDefault();
                             if (checkAttributeName != null)
                             {
                                 objAttributes = new { code = code, Id = 0 };
-
                             }
                             else
                             {
-                                //checkData.AttributeName = attributes.AttributeName.TrimStart().TrimEnd();
                                 checkData.AttributeDescription = attributes.AttributeDescription;
-                                checkData.AttributeWidth = attributes.AttributeWidth;
                                 checkData.AttributeType = attributes.AttributeType;
                                 checkData.AttributeLabel = attributes.AttributeLabel;
                                 checkData.DefaultValueWithTextBox = attributes.DefaultValueWithTextBox != null ? attributes.DefaultValueWithTextBox : null;
@@ -166,16 +200,35 @@ namespace AttributesManagement.DataAccess
                                 checkData.UpDateBy = attributes.UpDateBy;
                                 checkData.UpdateDate = DateTime.Now;
                                 checkData.CategoryParentCode = attributes.CategoryParentCode != null ? attributes.CategoryParentCode : null;
-                                //checkData.DefaultValue = attributes.CategoryParentCode != "" ? attributes.DefaultValue : "";
                                 checkData.IsDelete = false;
                                 checkData.ModuleParent = attributes.ModuleParent;
                                 checkData.AttributeDescription = attributes.AttributeDescription;
-                                db.Entry(checkData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                                code = db.SaveChanges();
+                                //Thêm chức năng
+                                checkData.MaximumLength = attributes.MaximumLength;
+                                checkData.MinimumLength = attributes.MinimumLength;
+                                checkData.IsEnable = attributes.IsEnable;
+                                checkData.IsLinkFieldInformation = attributes.IsLinkFieldInformation;
+                                checkData.MaxValue = attributes.MaxValue;
+                                checkData.MinValue = attributes.MinValue;
+                                checkData.RuleInputValue = attributes.RuleInputValue;
+                                if (attributes.IsLinkFieldInformation.Value == true)
+                                {
+                                    checkData.InputFieldValue = (attributes.InputFieldValue != "") ? attributes.InputFieldValue : "";
+                                }
+                                if (attributes.IsReuse == AttributeConstant.IsDependentValue)
+                                {
+                                    AddDependentValue(attributes.DependentValues, checkData.AttributeCode, checkData.ModuleParent);
+                                }
+                                if (attributes.IsReuse == AttributeConstant.IsGeneratingValue)
+                                {
+                                    AddGeneratingValue(attributes.GeneratingValues, checkData.AttributeCode, checkData.ModuleParent, checkData.IsReuse);
+                                }
                                 if (attributes.DetailRefer.Count() > 0)
                                 {
                                     AddReferenceConstraint(attributes.DetailRefer, checkData.AttributeCode, checkData.ModuleParent);
                                 }
+                                db.Entry(checkData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                                code = db.SaveChanges();
                                 SetStringCache(AttributeConstant.Attributes_GetListAttributes, GetListAttributes(attributes.ModuleParent));
                                 objAttributes = new { code = code, Id = checkData.AttributesId };
                             }
@@ -189,7 +242,7 @@ namespace AttributesManagement.DataAccess
                             result.DefaultValue = attributes.DefaultValue;
                             db.Entry(result).State = EntityState.Modified;
                             db.SaveChanges();
-                        }                        
+                        }
                     }
                     scope.Complete();
                     return objAttributes;
@@ -243,25 +296,27 @@ namespace AttributesManagement.DataAccess
             {
                 for (int i = 0; i < lstAttribute.Count; i++)
                 {
-                    TblVocattributes tblVocattributes = db.TblVocattributes.Where(a => a.AttributeCode == lstAttribute[i].AttributeCode).FirstOrDefault();
-                    if (tblVocattributes != null)
+                    TblAttributes tblAttributes = db.TblAttributes.Where(a => a.AttributeCode == lstAttribute[i].AttributeCode).FirstOrDefault();
+                    if (tblAttributes != null)
                     {
                         List<AttributeOption> lstOption = new List<AttributeOption>();
                         AttributeObject attributeObject = new AttributeObject();
-                        attributeObject.AttributeId = tblVocattributes.AttributesId;
-                        attributeObject.AttributeCode = tblVocattributes.AttributeCode;
-                        attributeObject.AttributeLabel = tblVocattributes.AttributeLabel;
-                        attributeObject.AttributeType = tblVocattributes.AttributeType;
+                        attributeObject.AttributeId = tblAttributes.AttributesId;
+                        attributeObject.AttributeCode = tblAttributes.AttributeCode;
+                        attributeObject.AttributeLabel = tblAttributes.AttributeLabel;
+                        attributeObject.AttributeType = tblAttributes.AttributeType;
+                        attributeObject.MaximumLength = tblAttributes.MaximumLength;
+                        attributeObject.MinimumLength = tblAttributes.MinimumLength;
                         attributeObject.AttributeCol = lstAttribute[i].AttributeColumn.Value;
-                        attributeObject.DataType = tblVocattributes.DataType;
-                        attributeObject.DefaultValue = tblVocattributes.DefaultValue;
-                        attributeObject.IsCategory = tblVocattributes.IsCategory.HasValue ? tblVocattributes.IsCategory.Value : false;
-                        attributeObject.IsDuplicate = tblVocattributes.IsDuplicate.HasValue ? tblVocattributes.IsDuplicate.Value : false;
-                        attributeObject.IsRequired = tblVocattributes.IsRequired.HasValue ? tblVocattributes.IsRequired.Value : false;
-                        attributeObject.IsTableShow = tblVocattributes.IsTableShow.HasValue ? tblVocattributes.IsTableShow.Value : false;
-                        if (tblVocattributes.IsCategory.HasValue)
+                        attributeObject.DataType = tblAttributes.DataType;
+                        attributeObject.DefaultValue = tblAttributes.DefaultValue;
+                        attributeObject.IsCategory = tblAttributes.IsCategory.HasValue ? tblAttributes.IsCategory.Value : false;
+                        attributeObject.IsDuplicate = tblAttributes.IsDuplicate.HasValue ? tblAttributes.IsDuplicate.Value : false;
+                        attributeObject.IsRequired = tblAttributes.IsRequired.HasValue ? tblAttributes.IsRequired.Value : false;
+                        attributeObject.IsTableShow = tblAttributes.IsTableShow.HasValue ? tblAttributes.IsTableShow.Value : false;
+                        if (tblAttributes.IsCategory.HasValue)
                         {
-                            List<TblCategory> tblCategories = db.TblCategory.Where(a => a.CategoryTypeCode == tblVocattributes.CategoryParentCode).ToList();
+                            List<TblCategory> tblCategories = db.TblCategory.Where(a => a.CategoryTypeCode == tblAttributes.CategoryParentCode).ToList();
                             for (int j = 0; j < tblCategories.Count; j++)
                             {
                                 AttributeOption attributeOption = new AttributeOption();
@@ -289,7 +344,7 @@ namespace AttributesManagement.DataAccess
             TblAttributeOptions check = db.TblAttributeOptions.Where(v => v.AttributeId == attributesId && v.IsDelete == false).FirstOrDefault();
             if (check == null)
             {
-                TblVocattributes deleteAttributes = db.TblVocattributes.Where(c => c.AttributesId == attributesId && c.IsDelete == false).FirstOrDefault();
+                TblAttributes deleteAttributes = db.TblAttributes.Where(c => c.AttributesId == attributesId && c.IsDelete == false).FirstOrDefault();
                 deleteAttributes.IsDelete = true;
                 db.Entry(deleteAttributes).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 db.SaveChanges();
@@ -305,7 +360,7 @@ namespace AttributesManagement.DataAccess
         public List<InfoAttribute> GetListAttributes(string moduleParent)
         {
             List<InfoAttribute> lstAddtribute = new List<InfoAttribute>();
-            List<TblVocattributes> lst = db.TblVocattributes.Where(v => v.ModuleParent == moduleParent && v.IsDelete == false).ToList();
+            List<TblAttributes> lst = db.TblAttributes.Where(v => v.ModuleParent == moduleParent && v.IsDelete == false).ToList();
             foreach (var item in lst)
             {
                 InfoAttribute addAddtribute = new InfoAttribute();
@@ -315,7 +370,8 @@ namespace AttributesManagement.DataAccess
                 addAddtribute.AttributeLabel = item.AttributeLabel;
                 addAddtribute.AttributesId = item.AttributesId;
                 addAddtribute.AttributeType = item.AttributeType;
-                addAddtribute.AttributeWidth = item.AttributeWidth;
+                addAddtribute.MaximumLength = item.MaximumLength;
+                addAddtribute.MinimumLength = item.MinimumLength;
                 addAddtribute.CategoryParentCode = item.CategoryParentCode;
                 addAddtribute.DefaultValueWithTextBox = item.DefaultValueWithTextBox;
                 addAddtribute.IsSort = item.IsSort;
@@ -332,6 +388,13 @@ namespace AttributesManagement.DataAccess
                 addAddtribute.DefaultValue = item.DefaultValue;
                 addAddtribute.ModuleParent = item.ModuleParent;
                 addAddtribute.AttributeDescription = item.AttributeDescription;
+                addAddtribute.IsEnable = item.IsEnable;
+                addAddtribute.IsLinkFieldInformation = item.IsLinkFieldInformation;
+                addAddtribute.InputFieldValue = item.InputFieldValue;
+                addAddtribute.MaxValue = item.MaxValue;
+                addAddtribute.MinValue = item.MinValue;
+                addAddtribute.RuleInputValue = item.RuleInputValue;
+                addAddtribute.GeneratingValues = GetDetailGeneratingValue(item.AttributeCode, item.ModuleParent);
                 if (addAddtribute.CategoryParentCode != null)
                 {
                     var result = db.TblCategory.Where(x => x.CategoryTypeCode == addAddtribute.CategoryParentCode).ToList();
@@ -355,7 +418,7 @@ namespace AttributesManagement.DataAccess
         public object GetObjectAttributes(int Id)
         {
             List<InfoAttribute> lstAddtribute = new List<InfoAttribute>();
-            List<TblVocattributes> lst = db.TblVocattributes.Where(v => v.AttributesId == Id && v.IsDelete == false).ToList();
+            List<TblAttributes> lst = db.TblAttributes.Where(v => v.AttributesId == Id && v.IsDelete == false).ToList();
             foreach (var item in lst)
             {
                 InfoAttribute addAddtribute = new InfoAttribute();
@@ -364,7 +427,8 @@ namespace AttributesManagement.DataAccess
                 addAddtribute.AttributeLabel = item.AttributeLabel;
                 addAddtribute.AttributesId = item.AttributesId;
                 addAddtribute.AttributeType = item.AttributeType;
-                addAddtribute.AttributeWidth = item.AttributeWidth;
+                addAddtribute.MaximumLength = item.MaximumLength;
+                addAddtribute.MinimumLength = item.MinimumLength;
                 addAddtribute.CategoryParentCode = item.CategoryParentCode;
                 addAddtribute.DefaultValueWithTextBox = item.DefaultValueWithTextBox;
                 addAddtribute.CreateBy = item.CreateBy;
@@ -378,6 +442,14 @@ namespace AttributesManagement.DataAccess
                 addAddtribute.DefaultValue = item.DefaultValue;
                 addAddtribute.ModuleParent = item.ModuleParent;
                 addAddtribute.AttributeDescription = item.AttributeDescription;
+                addAddtribute.IsLinkFieldInformation = item.IsLinkFieldInformation;
+                addAddtribute.InputFieldValue = item.InputFieldValue;
+                addAddtribute.MaxValue = item.MaxValue;
+                addAddtribute.MinValue = item.MinValue;
+                addAddtribute.IsEnable = item.IsEnable;
+                addAddtribute.RuleInputValue = item.RuleInputValue;
+                addAddtribute.GeneratingValues = GetDetailGeneratingValue(item.AttributeCode, item.ModuleParent);
+                //addAddtribute.DependentValues = GetDetailDependentValue(item.AttributeCode, item.ModuleParent);
                 if (item.CategoryParentCode != null)
                 {
                     var result = db.TblCategory.Where(x => x.CategoryTypeCode == item.CategoryParentCode).ToList();
@@ -410,7 +482,43 @@ namespace AttributesManagement.DataAccess
 
             return lst.Select(s => s.ConstraintId.ToString()).ToArray();
         }
-       
+        /// <summary>
+        /// Get detail value Generating
+        /// </summary>
+        /// <param name="attributeCode"></param>
+        /// <param name="menuCode"></param>
+        /// <returns></returns>
+        public TblGeneratingValues GetDetailGeneratingValue(string attributeCode, string menuCode)
+        {
+            try
+            {
+                var lst = db.TblGeneratingValues.Where(v => v.AttributeCode == attributeCode && v.MenuCode == menuCode).FirstOrDefault();
+                return lst;
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+            
+        }
+        /// <summary>
+        /// Get detail value Dependent
+        /// </summary>
+        /// <param name="attributeCode"></param>
+        /// <param name="menuCode"></param>
+        /// <returns></returns>
+        public DependentValue GetDetailDependentValue(string attributeCode, string menuCode)
+        {
+            try
+            {
+                var lstDependent = db.TblDependentValues.Where(v => v.AttributeCode == attributeCode && v.ModuleCode == menuCode).FirstOrDefault();
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
         #region Ràng buộc dữ liệu
         /// <summary>
         /// Add new Attribute Constraint
@@ -462,6 +570,97 @@ namespace AttributesManagement.DataAccess
             }
         }
         /// <summary>
+        /// Add new generating value
+        /// </summary>
+        /// <param name="generatingValue"></param>
+        /// <param name="attributeCode"></param>
+        /// <param name="menuCode"></param>
+        /// <param name="isReuse"></param>
+        public void AddGeneratingValue(TblGeneratingValues generatingValue, string attributeCode,string menuCode,string isReuse)
+        {
+            try
+            {
+                TblGeneratingValues checkData = db.TblGeneratingValues.Where(v => v.AttributeCode == attributeCode && v.MenuCode == menuCode).FirstOrDefault();
+                if(checkData !=null)
+                {
+                    db.TblGeneratingValues.Remove(checkData);
+                    db.SaveChanges();
+                }
+                if (generatingValue != null)
+                {
+                    TblGeneratingValues addGeneratingValue = new TblGeneratingValues();
+                    addGeneratingValue.MenuCode = menuCode;
+                    addGeneratingValue.AttributeCode = attributeCode;
+                    addGeneratingValue.InputFormat = generatingValue.InputFormat;
+                    addGeneratingValue.IsReuse = isReuse;
+                    addGeneratingValue.MinimumLenght = generatingValue.MinimumLenght;
+                    addGeneratingValue.MaxLenght = generatingValue.MaxLenght;
+                    addGeneratingValue.ExclusionCharacters = generatingValue.ExclusionCharacters;
+                    addGeneratingValue.RequiredCharacters = generatingValue.RequiredCharacters;
+                    addGeneratingValue.IsCapitalizeLetter = generatingValue.IsCapitalizeLetter;
+                    addGeneratingValue.IsLowercaseLetter = generatingValue.IsLowercaseLetter;
+                    addGeneratingValue.IsSpecialCharacters = generatingValue.IsSpecialCharacters;
+                    db.TblGeneratingValues.Add(addGeneratingValue);
+                    db.SaveChanges();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public void AddDependentValue(DependentValue dependentValues, string attributeCode, string menuCode)
+        {
+            try
+            {
+                List<TblDependentValues> lstDependentValue = db.TblDependentValues.Where(v => v.AttributeCode == attributeCode && v.ModuleCode == menuCode).ToList();
+                if(lstDependentValue.Count() >0)
+                {
+                    db.TblDependentValues.RemoveRange(lstDependentValue);
+                    db.SaveChanges();
+                }
+                if (dependentValues.InputValue != null)
+                {
+                    foreach (string item in dependentValues.InputValue)
+                    {
+                        TblDependentValues addDependentValue = new TblDependentValues();
+                        addDependentValue.AttributeCode = attributeCode;
+                        addDependentValue.ModuleCode = menuCode;
+                        addDependentValue.CalculatingType = dependentValues.CalculatingType;
+                        addDependentValue.CalculatingDetail = (dependentValues.CalculatingType == AttributeConstant.Calculation) ? dependentValues.CalculatingDetail : "";
+                        addDependentValue.AttributeInfomation = dependentValues.AttributeInfomation;
+                        addDependentValue.AttributeCondition = dependentValues.AttributeCondition;
+                        addDependentValue.ConditionCode = dependentValues.ConditionCode;
+                        addDependentValue.ConditionValue = item;
+                        addDependentValue.FunctionCode = dependentValues.FunctionCode;
+                        db.TblDependentValues.Add(addDependentValue);
+                        db.SaveChanges();
+                    }
+                }
+                else
+                {
+                    TblDependentValues addDependent = new TblDependentValues();
+                    addDependent.AttributeCode = attributeCode;
+                    addDependent.CalculatingType = dependentValues.CalculatingType;
+                    addDependent.ModuleCode = menuCode;
+                    addDependent.CalculatingDetail = (dependentValues.CalculatingType == AttributeConstant.Calculation) ? dependentValues.CalculatingDetail : "";
+                    addDependent.AttributeInfomation = (dependentValues.CalculatingType == AttributeConstant.FunctionCalculation) ? dependentValues.AttributeInfomation : "";
+                    addDependent.AttributeCondition = (dependentValues.CalculatingType == AttributeConstant.FunctionCalculation) ? dependentValues.AttributeCondition : "";
+                    addDependent.ConditionCode = (dependentValues.CalculatingType == AttributeConstant.FunctionCalculation) ? dependentValues.ConditionCode : "";
+                    addDependent.ConditionValue = (dependentValues.CalculatingType == AttributeConstant.FunctionCalculation) ? dependentValues.ConditionValue : "";
+                    addDependent.FunctionCode = (dependentValues.CalculatingType == AttributeConstant.FunctionCalculation) ? dependentValues.FunctionCode : "";
+                    db.TblDependentValues.Add(addDependent);
+                    db.SaveChanges(); 
+                }
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+            
+        }
+        /// <summary>
         /// add new Refernce Constraint
         /// </summary>
         /// <param name="constraintType"></param>
@@ -469,35 +668,32 @@ namespace AttributesManagement.DataAccess
         /// <param name="MenuCode"></param>
         public void AddReferenceConstraint(string[] constraintType, string attributeCode, string MenuCode)
         {
-            using (TransactionScope scope1 = new TransactionScope())
+            try
             {
-                try
+                var lstReferneceConstraint = db.TblReferenceConstraint.Where(v => v.AttributeCode == attributeCode && v.MenuCode == MenuCode).ToList();
+                if (lstReferneceConstraint.Count > 0)
                 {
-                    List<TblReferenceConstraint> lstReferneceConstraint = db.TblReferenceConstraint.Where(v => v.AttributeCode == attributeCode && v.MenuCode == MenuCode).ToList();
-                    if (lstReferneceConstraint.Count > 0)
+                    db.TblReferenceConstraint.RemoveRange(lstReferneceConstraint);
+                    db.SaveChanges();
+                }
+                if (constraintType != null)
+                {
+                    foreach (string item in constraintType)
                     {
-                        db.TblReferenceConstraint.RemoveRange(lstReferneceConstraint);
+                        TblReferenceConstraint addReferenceConstraint = new TblReferenceConstraint();
+                        addReferenceConstraint.ConstraintId = Int32.Parse(item);
+                        addReferenceConstraint.AttributeCode = attributeCode;
+                        addReferenceConstraint.MenuCode = MenuCode;
+                        db.TblReferenceConstraint.Add(addReferenceConstraint);
                         db.SaveChanges();
                     }
-                    if (constraintType != null)
-                    {
-                        foreach (string item in constraintType)
-                        {
-                            TblReferenceConstraint addReferenceConstraint = new TblReferenceConstraint();
-                            addReferenceConstraint.ConstraintId = Int32.Parse(item);
-                            addReferenceConstraint.AttributeCode = attributeCode;
-                            addReferenceConstraint.MenuCode = MenuCode;
-                            db.TblReferenceConstraint.Add(addReferenceConstraint);
-                            db.SaveChanges();
-                        }
-                    }
-                    scope1.Complete();
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
                 }
             }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
         }
         /// <summary>
         /// update Attribute Constraint
@@ -625,13 +821,20 @@ namespace AttributesManagement.DataAccess
                     if (formId != 0)
                     {
                         AddAttributeForm(cimsForm.tblCimsattributeForm, cimsForm.tblCimsForm.ChildCode, formId);
-                        var attCreateBy = db.TblVocattributes.Where(x => x.AttributeCode == AttributeConstant.Attributes_CreateBy).FirstOrDefault();
-                        attCreateBy.DefaultValue = cimsForm.tblCimsForm.CreateBy;
-                        attCreateBy.DefaultValueWithTextBox = cimsForm.tblCimsForm.CreateBy;
-                        db.Entry(attCreateBy).State = EntityState.Modified;
-                        var attCreateDate = db.TblVocattributes.Where(x => x.AttributeCode == AttributeConstant.Attributes_CreateDate).FirstOrDefault();
-                        attCreateDate.DefaultValue = String.Format("{0:r}", cimsForm.tblCimsForm.CreateDate);
-                        db.Entry(attCreateDate).State = EntityState.Modified;
+                        var attCreateBy = db.TblAttributes.Where(x => x.AttributeCode == AttributeConstant.Attributes_CreateBy).FirstOrDefault();
+                        if (attCreateBy != null)
+                        {
+                            attCreateBy.DefaultValue = cimsForm.tblCimsForm.CreateBy;
+                            attCreateBy.DefaultValueWithTextBox = cimsForm.tblCimsForm.CreateBy;
+                            db.Entry(attCreateBy).State = EntityState.Modified;
+                        }                        
+                        var attCreateDate = db.TblAttributes.Where(x => x.AttributeCode == AttributeConstant.Attributes_CreateDate).FirstOrDefault();
+                        if (attCreateDate != null)
+                        {
+                            attCreateDate.DefaultValue = String.Format("{0:r}", cimsForm.tblCimsForm.CreateDate);
+                            attCreateDate.DefaultValueWithTextBox = String.Format("{0:r}", cimsForm.tblCimsForm.CreateDate);
+                            db.Entry(attCreateDate).State = EntityState.Modified;
+                        }                        
                         var result = db.TblCimsform.Where(x => x.ChildCode == cimsForm.tblCimsForm.ChildCode).FirstOrDefault();
                         if (result != null)
                         {
@@ -666,7 +869,7 @@ namespace AttributesManagement.DataAccess
                 int code = 0;
                 try
                 {
-                    TblCimsform editForm = db.TblCimsform.Where(v => v.ChildCode == updateForm.tblCimsForm.ChildCode && v.IsDelete == false).FirstOrDefault();
+                    TblCimsform editForm = db.TblCimsform.Where(v => v.ChildCode == updateForm.tblCimsForm.ChildCode && v.IsDelete != true).FirstOrDefault();
                     if (editForm != null)
                     {
                         editForm.FormName = updateForm.tblCimsForm.FormName;
@@ -735,13 +938,6 @@ namespace AttributesManagement.DataAccess
                             db.SaveChanges();
                         }
                     }
-                    foreach (var item in cimsAttributesForm)
-                    {
-                        var result = db.TblVocattributes.Where(x => x.AttributeCode == item.AttributeCode).FirstOrDefault();
-                        //result.Disabled = item.Dis;
-                        db.Entry(result).State = EntityState.Modified;
-                        db.SaveChanges();
-                    }
                     scope1.Complete();
                 }
                 catch (Exception ex)
@@ -765,9 +961,9 @@ namespace AttributesManagement.DataAccess
         /// </summary>
         /// <param name="menucode"></param>
         /// <returns></returns>
-        public List<TblVocattributes> GetAllAttributeRequired(string menucode)
+        public List<TblAttributes> GetAllAttributeRequired(string menucode)
         {
-            List<TblVocattributes> lstAttribute = db.TblVocattributes.Where(v => v.IsDelete == false && v.ModuleParent == menucode && v.IsRequired == true).ToList();
+            List<TblAttributes> lstAttribute = db.TblAttributes.Where(v => v.IsDelete == false && v.ModuleParent == menucode && v.IsRequired == true).ToList();
             return lstAttribute;
         }
         #endregion
@@ -806,6 +1002,8 @@ namespace AttributesManagement.DataAccess
             _distributedCache.SetString(cacheKey, Newtonsoft.Json.JsonConvert.SerializeObject(obj), options.SetSlidingExpiration(TimeSpan.FromMinutes(15)));
 
         }
+
+        #endregion
         #region get list dataType,Control
         public List<TblCategory> GetListDataType()
         {
@@ -880,15 +1078,22 @@ namespace AttributesManagement.DataAccess
         {
             try
             {
-                var objectParentCategory = from a in db.TblCategory
-                                           where (a.IsDelete == false && (a.CategoryTypeCode == null || a.CategoryTypeCode == ""))
-                                           select new
-                                           {
-                                               a.Id,
-                                               a.CategoryName,
-                                               a.CategoryCode
+                var objectParentCategory = (from a in db.TblCategory
+                                            where (a.IsDelete == false && (a.CategoryTypeCode == null || a.CategoryTypeCode == ""))
+                                            select new
+                                            {
+                                                CategoryName = a.CategoryName,
+                                                CategoryCode = a.CategoryCode,
+                                                CategoryTypeCode = a.CategoryTypeCode
+                                            }).Concat(from b in db.TblCategoryGroup
+                                                      where (b.IsDelete == false)
+                                                      select new
+                                                      {
+                                                          CategoryName = b.CategoryGroupName,
+                                                          CategoryCode = b.CategoryCode,
+                                                          CategoryTypeCode = b.CategoryTypeCode
+                                                      });
 
-                                           };
                 return objectParentCategory;
             }
             catch (Exception ex)
@@ -921,7 +1126,6 @@ namespace AttributesManagement.DataAccess
             }
         }
         #endregion
-        #endregion
         public static string LocDau(string str)
         {
             //Thay thế và lọc dấu từng char      
@@ -932,8 +1136,6 @@ namespace AttributesManagement.DataAccess
             }
             return str;
         }
-
-
         #region vudt1
         public object GetAllAttributesCimsWithRowDetails(string ChildCode)
         {
@@ -979,37 +1181,38 @@ namespace AttributesManagement.DataAccess
                 {
                     for (int i = 0; i < lstAttribute.Count; i++)
                     {
-                        TblVocattributes tblVocattributes = db.TblVocattributes.Where(a => a.AttributeCode == lstAttribute[i].AttributeCode && a.IsDelete == false).FirstOrDefault();
-                        if (tblVocattributes != null)
+                        TblAttributes tblAttributes = db.TblAttributes.Where(a => a.AttributeCode == lstAttribute[i].AttributeCode && a.IsDelete == false).FirstOrDefault();
+                        if (tblAttributes != null)
                         {
                             List<AttributeOption> lstOption = new List<AttributeOption>();
                             AttributesObjectDTO attributeObject = new AttributesObjectDTO();
-                            attributeObject.AttributeId = tblVocattributes.AttributesId;
-                            attributeObject.AttributeCode = tblVocattributes.AttributeCode;
-                            attributeObject.AttributeLabel = tblVocattributes.AttributeLabel;
+                            attributeObject.AttributeId = tblAttributes.AttributesId;
+                            attributeObject.AttributeCode = tblAttributes.AttributeCode;
+                            attributeObject.AttributeLabel = tblAttributes.AttributeLabel;
                             attributeObject.AttributeType = lstAttribute[i].AttributeType;
-                            attributeObject.AttributeDescription = tblVocattributes.AttributeDescription;
-                            attributeObject.AttributeWidth = tblVocattributes.AttributeWidth;
-                            attributeObject.IsReuse = tblVocattributes.IsReuse;
-                            attributeObject.IsVisible = tblVocattributes.IsVisible;
-                            attributeObject.IsDuplicate = tblVocattributes.IsDuplicate;
-                            attributeObject.DetailRefer = getArrayString(tblVocattributes.AttributeCode);
+                            attributeObject.AttributeDescription = tblAttributes.AttributeDescription;
+                            attributeObject.MaximumLength = tblAttributes.MaximumLength;
+                            attributeObject.MinimumLength = tblAttributes.MinimumLength;
+                            attributeObject.IsReuse = tblAttributes.IsReuse;
+                            attributeObject.IsVisible = tblAttributes.IsVisible;
+                            attributeObject.IsDuplicate = tblAttributes.IsDuplicate;
+                            attributeObject.DetailRefer = getArrayString(tblAttributes.AttributeCode);
                             attributeObject.AttributeCol = lstAttribute[i].AttributeColumn.Value;
                             attributeObject.AttrOrder = lstAttribute[i].AttrOrder.Value;
                             attributeObject.IsShowLabel = lstAttribute[i].IsShowLabel;
                             attributeObject.DefaultValue = lstAttribute[i].DefaultValue;
-                            attributeObject.IsDuplicate = tblVocattributes.IsDuplicate;
+                            attributeObject.IsDuplicate = tblAttributes.IsDuplicate;
                             attributeObject.RowIndex = lstAttribute[i].RowIndex.Value;
                             attributeObject.AttributeColumn = lstAttribute[i].AttributeColumn.Value;
-                            attributeObject.DataType = tblVocattributes.DataType;
-                            attributeObject.CategoryParentCode = tblVocattributes.CategoryParentCode;
-                            attributeObject.DefaultValueWithTextBox = tblVocattributes.DefaultValueWithTextBox;
-                            attributeObject.IsCategory = tblVocattributes.IsCategory.HasValue ? tblVocattributes.IsCategory.Value : false;
-                            attributeObject.IsRequired = tblVocattributes.IsRequired.HasValue ? tblVocattributes.IsRequired.Value : false;
-                            attributeObject.IsTableShow = tblVocattributes.IsTableShow.HasValue ? tblVocattributes.IsTableShow.Value : false;
-                            if (tblVocattributes.IsCategory.HasValue)
+                            attributeObject.DataType = tblAttributes.DataType;
+                            attributeObject.CategoryParentCode = tblAttributes.CategoryParentCode;
+                            attributeObject.DefaultValueWithTextBox = tblAttributes.DefaultValueWithTextBox;
+                            attributeObject.IsCategory = tblAttributes.IsCategory.HasValue ? tblAttributes.IsCategory.Value : false;
+                            attributeObject.IsRequired = tblAttributes.IsRequired.HasValue ? tblAttributes.IsRequired.Value : false;
+                            attributeObject.IsTableShow = tblAttributes.IsTableShow.HasValue ? tblAttributes.IsTableShow.Value : false;
+                            if (tblAttributes.IsCategory.HasValue)
                             {
-                                List<TblCategory> tblCategories = db.TblCategory.Where(a => a.CategoryTypeCode == tblVocattributes.CategoryParentCode).ToList();
+                                List<TblCategory> tblCategories = db.TblCategory.Where(a => a.CategoryTypeCode == tblAttributes.CategoryParentCode).ToList();
                                 for (int j = 0; j < tblCategories.Count; j++)
                                 {
                                     AttributeOption attributeOption = new AttributeOption();
@@ -1018,9 +1221,9 @@ namespace AttributesManagement.DataAccess
                                     lstOption.Add(attributeOption);
                                 }
                             }
-                            if (tblVocattributes.CategoryParentCode != null)
+                            if (tblAttributes.CategoryParentCode != null)
                             {
-                                var result = db.TblCategory.Where(x => x.CategoryTypeCode == tblVocattributes.CategoryParentCode).ToList();
+                                var result = db.TblCategory.Where(x => x.CategoryTypeCode == tblAttributes.CategoryParentCode).ToList();
                                 if (result != null)
                                 {
                                     foreach (var item in result)
@@ -1050,7 +1253,7 @@ namespace AttributesManagement.DataAccess
                 int code = 0;
                 try
                 {
-                    TblCimsform editForm = db.TblCimsform.Where(v => v.ChildCode == updateForm.tblCimsForm.ChildCode && v.IsDelete == false).FirstOrDefault();
+                    TblCimsform editForm = db.TblCimsform.Where(v => v.ChildCode == updateForm.tblCimsForm.ChildCode && v.IsDelete != true).FirstOrDefault();
                     if (editForm != null)
                     {
                         editForm.FormName = updateForm.tblCimsForm.FormName;
@@ -1060,40 +1263,7 @@ namespace AttributesManagement.DataAccess
                         editForm.UpdateBy = updateForm.tblCimsForm.UpdateBy;
                         editForm.UpdateDate = updateForm.tblCimsForm.UpdateDate;
                         db.Entry(editForm).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                        AddAttributeForm(updateForm.tblCimsattributeForm, updateForm.tblCimsForm.ChildCode, editForm.FormId);
-                        if (updateForm.Table.Count() > 0 && updateForm.tblCimsForm.ChildCode == AttributeConstant.ListForm)
-                        {
-                            foreach (var item in updateForm.Table)
-                            {
-                                var result = db.TblVocattributes.Where(x => x.AttributeCode == item.AttributeCode && x.ModuleParent == item.ModuleParent && x.IsDelete == false).FirstOrDefault();
-                                if(result != null)
-                                {
-                                    result.IsTableShow = item.IsTableShow;
-                                    result.IndexTitleTable = item.IndexTitleTable;
-                                    result.IsSort = item.IsSort;
-                                    db.Entry(result).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                                }
-                            }
-                            var lst = db.TblVocattributes.Where(x => !updateForm.Table.Where(c => c.AttributeCode == x.AttributeCode && c.ModuleParent == x.ModuleParent && x.IsDelete == false).Select(c => c.AttributeCode).Contains(x.AttributeCode)).ToList();
-                            foreach (var item in lst)
-                            {
-                                item.IsTableShow = false;
-                                item.IndexTitleTable = null;
-                                item.IsSort = null;
-                                db.Entry(item).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                            }
-                        }
-                        else
-                        {
-                            var lst = db.TblVocattributes.ToList();
-                            foreach (var item in lst)
-                            {
-                                item.IsTableShow = false;
-                                item.IndexTitleTable = null;
-                                item.IsSort = null;
-                                db.Entry(item).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                            }
-                        }
+                        AddAttributeForm(updateForm.tblCimsattributeForm, updateForm.tblCimsForm.ChildCode, editForm.FormId);                        
                         var formHistory = new TblCimsFormHistory();
                         formHistory.ChildCode = updateForm.tblCimsForm.ChildCode;
                         formHistory.Description = AttributeConstant.UpdateForm;
@@ -1152,7 +1322,7 @@ namespace AttributesManagement.DataAccess
                         {
                             foreach (var item in cimsForm.Table)
                             {
-                                var result1 = db.TblVocattributes.Where(x => x.AttributeCode == item.AttributeCode && x.ModuleParent == item.ModuleParent && x.IsDelete == false).FirstOrDefault();
+                                var result1 = db.TblAttributes.Where(x => x.AttributeCode == item.AttributeCode && x.ModuleParent == item.ModuleParent && x.IsDelete == false).FirstOrDefault();
                                 if (result1 != null)
                                 {
                                     result1.IsTableShow = item.IsTableShow;
@@ -1161,7 +1331,7 @@ namespace AttributesManagement.DataAccess
                                     db.Entry(result1).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                                 }
                             }
-                            var lst = db.TblVocattributes.Where(x => !cimsForm.Table.Where(c => c.AttributeCode == x.AttributeCode && c.ModuleParent == x.ModuleParent && x.IsDelete == false).Select(c => c.AttributeCode).Contains(x.AttributeCode)).ToList();
+                            var lst = db.TblAttributes.Where(x => !cimsForm.Table.Where(c => c.AttributeCode == x.AttributeCode && c.ModuleParent == x.ModuleParent && x.IsDelete == false).Select(c => c.AttributeCode).Contains(x.AttributeCode)).ToList();
                             foreach (var item in lst)
                             {
                                 item.IsTableShow = false;
@@ -1172,7 +1342,7 @@ namespace AttributesManagement.DataAccess
                         }
                         else
                         {
-                            var lst = db.TblVocattributes.ToList();
+                            var lst = db.TblAttributes.ToList();
                             foreach (var item in lst)
                             {
                                 item.IsTableShow = false;
@@ -1201,6 +1371,56 @@ namespace AttributesManagement.DataAccess
                 {
                     throw ex;
                 }
+            }
+        }
+
+        public object UpdateTableFormList(List<InfoAttribute> table)
+        {
+            try
+            {
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    if (table.Count() > 0)
+                    {
+                        foreach (var item in table)
+                        {
+                            var result1 = db.TblAttributes.Where(x => x.AttributeCode == item.AttributeCode && x.ModuleParent == item.ModuleParent && x.IsDelete == false).FirstOrDefault();
+                            if (result1 != null)
+                            {
+                                result1.IsTableShow = item.IsTableShow;
+                                result1.IndexTitleTable = item.IndexTitleTable;
+                                result1.IsSort = item.IsSort;
+                                db.Entry(result1).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                            }
+                        }
+                        var lst = db.TblAttributes.Where(x => !table.Where(c => c.AttributeCode == x.AttributeCode && c.ModuleParent == x.ModuleParent && x.IsDelete == false).Select(c => c.AttributeCode).Contains(x.AttributeCode)).ToList();
+                        foreach (var item in lst)
+                        {
+                            item.IsTableShow = false;
+                            item.IndexTitleTable = null;
+                            item.IsSort = null;
+                            db.Entry(item).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                        }
+                    }
+                    else
+                    {
+                        var lst = db.TblAttributes.ToList();
+                        foreach (var item in lst)
+                        {
+                            item.IsTableShow = false;
+                            item.IndexTitleTable = null;
+                            item.IsSort = null;
+                            db.Entry(item).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                        }
+                    }
+                    db.SaveChanges();
+                    scope.Complete();
+                    return AttributesMessages.MS0003;
+                }
+            }
+            catch (Exception ex)
+            {
+                return new { Message = ex.Message };
             }
         }
         #endregion

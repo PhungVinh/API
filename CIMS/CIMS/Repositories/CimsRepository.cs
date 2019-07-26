@@ -9,11 +9,11 @@ namespace CIMS.Repositories
 {
     public interface CimsRepository : IBaseRepository
     {
-        object AddCimsValue(List<TblCimsattributeValue> Cims);
+        object AddCimsValue(List<TblCimsattributeValue> Cims,string username);
         object GetCimsvalue(string ModuleParent, int currPage, int recodperpage);
 
         object GetCustomerList_RecordId(string @RecordId);
-        object EditCimsValue(List<TblCimsattributeValue> lstCustomer, string rowIdentify);
+        object EditCimsValue(List<TblCimsattributeValue> lstCustomer, string rowIdentify, string username);
         int DeleteCims(string RecordId);
 
         #region vudt

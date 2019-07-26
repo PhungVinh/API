@@ -54,6 +54,22 @@ namespace AttributesManagement.DataAccess
             }
             // Info.  
         }
+        public List<List<dynamic>> GetAllChildCategory(string category)
+        {
+            // Initialization.  
+            try
+            {
+                DataSet ds = new DataSet();
+                SqlParameter[] para = new SqlParameter[1];
+                para[0] = new SqlParameter("@Category", category);
+                return ExecuteMultipleResults("GetAllChildCategory", para, typeof(ChildCategory));
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            // Info.  
+        }
         public List<List<dynamic>> ExecuteMultipleResults(string spName, SqlParameter[] parameters, params Type[] types)
         {
             List<List<dynamic>> results = new List<List<dynamic>>();

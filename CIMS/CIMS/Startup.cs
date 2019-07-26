@@ -49,16 +49,12 @@ namespace CIMS
                 ClockSkew = TimeSpan.Zero,
                 RequireExpirationTime = true,
             };
-
-            services.AddAuthentication(o =>
-            {
-                o.DefaultAuthenticateScheme = "TestKey";
-            })
-            .AddJwtBearer("TestKey", x =>
-            {
-                x.RequireHttpsMetadata = false;
-                x.TokenValidationParameters = tokenValidationParameters;
-            });
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                       .AddJwtBearer(x =>
+                       {
+                           x.RequireHttpsMetadata = false;
+                           x.TokenValidationParameters = tokenValidationParameters;
+                       });
             services.AddMvc();
             //Su dung entity framework
             services.AddEntityFrameworkSqlServer().AddDbContext<CRM_MPContext>();

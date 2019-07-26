@@ -52,9 +52,8 @@ namespace Encryption.Controllers
                 var model = new AttributeModel();
                 model.tblVocattributes = lstAttributes.Attributes;
                 model.UserName = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value;
-                var result = encryptionRepository.UpdateEncrpytion(model);
-
-                return StatusCode(result.StatusCode, new { Data = result.Response });
+                var result = encryptionRepository.UpdateEncrpytion(model, lstAttributes.OrgCode);
+                return StatusCode(result.StatusCode, new { data = result.Response });
             }
             return StatusCode(400);
         }

@@ -11,5 +11,7 @@ namespace AccountManagement.ViewModels
         public string Pass1;
         public string Pass2;
         public string oldPassword;
+        public string username;
+        public string codeReset;
     }
 }

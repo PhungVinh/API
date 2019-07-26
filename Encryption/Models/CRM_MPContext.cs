@@ -119,13 +119,13 @@ namespace Encryption.Models
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.CategoryCode).HasMaxLength(50);
+                entity.Property(e => e.CategoryCode).HasMaxLength(200);
 
                 entity.Property(e => e.CategoryDescription).HasMaxLength(500);
 
                 entity.Property(e => e.CategoryName).HasMaxLength(200);
 
-                entity.Property(e => e.CategoryTypeCode).HasMaxLength(50);
+                entity.Property(e => e.CategoryTypeCode).HasMaxLength(200);
 
                 entity.Property(e => e.CreateBy).HasMaxLength(50);
 
@@ -170,6 +170,8 @@ namespace Encryption.Models
                 entity.Property(e => e.AttributeCode)
                     .HasMaxLength(100)
                     .IsUnicode(false);
+
+                entity.Property(e => e.AttributeType).HasMaxLength(50);
 
                 entity.Property(e => e.ChildCode).HasMaxLength(50);
 
@@ -274,7 +276,11 @@ namespace Encryption.Models
 
                 entity.Property(e => e.CreatedBy).HasMaxLength(50);
 
+                entity.Property(e => e.Field).HasMaxLength(50);
+
                 entity.Property(e => e.ModuleName).HasMaxLength(50);
+
+                entity.Property(e => e.OrgCode).HasMaxLength(50);
 
                 entity.Property(e => e.ParentCode).HasMaxLength(50);
 

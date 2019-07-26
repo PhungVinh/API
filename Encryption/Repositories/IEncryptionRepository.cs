@@ -28,7 +28,7 @@ namespace Encryption.Repositories
         /// </summary>
         /// <param name="lstAttributes">Attributes are need encryption or decryption</param>
         /// <return>Status code 200 is success, otherwise status code is 400</return>
-        ResponseDTO UpdateEncrpytion(AttributeModel lstAttributes);
+        ResponseDTO UpdateEncrpytion(AttributeModel lstAttributes, string orgCode);
         /// <summary>
         /// Scheduler to execute encryption
         /// </summary>

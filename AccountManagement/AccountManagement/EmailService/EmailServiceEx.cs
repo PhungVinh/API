@@ -41,7 +41,7 @@ namespace AccountManagement.EmailService
                 newMail.IsBodyHtml = true;
                 newMail.SubjectEncoding = Encoding.UTF8;
                 newMail.HeadersEncoding = Encoding.UTF8;
-
+                //client.SendAsync(newMail, "");
                 new Thread(() => { client.Send(newMail); }).Start();
                 //using (MailMessage newMail = new MailMessage())
                 //{

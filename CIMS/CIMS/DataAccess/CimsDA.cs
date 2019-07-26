@@ -127,7 +127,7 @@ namespace CIMS.DataAccess
                 throw ex;
             }
         }
-        
+
         /// <summary>
         ///  // Ma hoa
         /// </summary>
@@ -182,7 +182,7 @@ namespace CIMS.DataAccess
             {
                 List<TblCimsattributeValue> deleteAU = db.TblCimsattributeValue.Where(au => au.RecordId == RecordId).ToList<TblCimsattributeValue>();
 
-                if(deleteAU != null)
+                if (deleteAU != null)
                 {
                     foreach (var item in deleteAU)
                     {
@@ -204,33 +204,7 @@ namespace CIMS.DataAccess
                 throw ex;
             }
         }
-        
-        /// <summary>
-        ///  // List truong thong tin ma hoa module
-        /// </summary>
-        /// phongtv
-        /// <param name="ModuleParent"></param>
-        /// <returns></returns>
-        public object ListVocattributes(string ModuleParent)
-        {
-            try
-            {
-                var lstAtt = (from a in db.TblVocattributes
-                              where (a.IsDelete == false && a.ModuleParent == ModuleParent)
-                              select new
-                              {
-                                  a.AttributeCode,
-                                  a.AttributeLabel
 
-                              });
-                return lstAtt;
-            }
-            catch (Exception ex)
-            {
-                return null;
-                throw ex;
-            }
-        }
         //Edit CIMS
         /// <summary>
         /// 
@@ -238,15 +212,16 @@ namespace CIMS.DataAccess
         /// <param name="lstCustomer"></param>
         /// <param name="rowIdentify"></param>
         /// <returns></returns>
-            public object EditCimsValue(List<TblCimsattributeValue> lstCustomer, string rowIdentify )
+        public object EditCimsValue(List<TblCimsattributeValue> lstCustomer, string rowIdentify, string username)
         {
 
             TblCimsattributeValue AttributesValue = db.TblCimsattributeValue.Where(a => a.RecordId == rowIdentify).FirstOrDefault();
 
-            if(AttributesValue != null)
+            if (AttributesValue != null)
             {
                 List<object> lstErrs = new List<object>();
                 List<TblCimsattributeValue> lstAttributes = new List<TblCimsattributeValue>();
+
                 for (int i = 0; i < lstCustomer.Count; i++)
                 {
                     TblVocattributes tblVocattributesIsRequired = db.TblVocattributes.Where(a => a.AttributeCode == lstCustomer[i].AttributeCode && a.IsRequired == true).FirstOrDefault();
@@ -258,7 +233,7 @@ namespace CIMS.DataAccess
                           ).FirstOrDefault();
                             if (tblVocattributesIsDuplicate != null)
                             {
-                                TblCimsattributeValue cimsCheck = db.TblCimsattributeValue.Where(b => b.AttributeCode.TrimEnd() == lstCustomer[i].AttributeCode && b.AttributeValue.ToString() == lstCustomer[i].AttributeValue
+                                TblCimsattributeValue cimsCheck = db.TblCimsattributeValue.Where(b => b.AttributeCode.TrimEnd() == lstCustomer[i].AttributeCode && b.AttributeValue.ToString().ToLower() == lstCustomer[i].AttributeValue.ToLower()
                                 && b.RecordId != rowIdentify).FirstOrDefault();
                                 if (cimsCheck == null)
                                 {
@@ -266,6 +241,7 @@ namespace CIMS.DataAccess
                                 && b.RecordId == rowIdentify).FirstOrDefault();
                                     cimsValue.AttributeCode = lstCustomer[i].AttributeCode;
                                     cimsValue.AttributeValue = lstCustomer[i].AttributeValue;
+                                    cimsValue.UpdatedBy = username;
                                     cimsValue.UpdatedDate = DateTime.Now;
                                     db.Entry(cimsValue).State = EntityState.Modified;
                                     db.SaveChanges();
@@ -274,7 +250,7 @@ namespace CIMS.DataAccess
                                 {
                                     lstErrs.Add(new
                                     {
-                                        field =  tblVocattributesIsDuplicate.AttributeCode,
+                                        field = tblVocattributesIsDuplicate.AttributeCode,
                                         name = tblVocattributesIsDuplicate.AttributeLabel,
                                         message = "NotDuplicate"
                                     });
@@ -282,10 +258,11 @@ namespace CIMS.DataAccess
                             }
                             else
                             {
-                                TblCimsattributeValue cimsValue = db.TblCimsattributeValue.Where(b => b.AttributeCode == lstCustomer[i].AttributeCode 
+                                TblCimsattributeValue cimsValue = db.TblCimsattributeValue.Where(b => b.AttributeCode == lstCustomer[i].AttributeCode
                                 && b.RecordId == rowIdentify).FirstOrDefault();
                                 cimsValue.AttributeCode = lstCustomer[i].AttributeCode;
                                 cimsValue.AttributeValue = lstCustomer[i].AttributeValue;
+                                cimsValue.UpdatedBy = username;
                                 cimsValue.UpdatedDate = DateTime.Now;
                                 db.Entry(cimsValue).State = EntityState.Modified;
                                 db.SaveChanges();
@@ -307,7 +284,7 @@ namespace CIMS.DataAccess
                      ).FirstOrDefault();
                         if (tblVocattributesIsDuplicate != null)
                         {
-                            TblCimsattributeValue cimsCheck = db.TblCimsattributeValue.Where(b => b.AttributeCode.TrimEnd() == lstCustomer[i].AttributeCode && b.AttributeValue.ToString() == lstCustomer[i].AttributeValue
+                            TblCimsattributeValue cimsCheck = db.TblCimsattributeValue.Where(b => b.AttributeCode.TrimEnd() == lstCustomer[i].AttributeCode && b.AttributeValue.ToString().ToLower() == lstCustomer[i].AttributeValue.ToLower()
                             && b.RecordId != rowIdentify).FirstOrDefault();
                             if (cimsCheck == null)
                             {
@@ -315,6 +292,7 @@ namespace CIMS.DataAccess
                                 && b.RecordId == rowIdentify).FirstOrDefault();
                                 cimsValue.AttributeCode = lstCustomer[i].AttributeCode;
                                 cimsValue.AttributeValue = lstCustomer[i].AttributeValue;
+                                cimsValue.UpdatedBy = username;
                                 cimsValue.UpdatedDate = DateTime.Now;
                                 db.Entry(cimsValue).State = EntityState.Modified;
                                 db.SaveChanges();
@@ -334,12 +312,32 @@ namespace CIMS.DataAccess
                         {
                             TblCimsattributeValue cimsValue = db.TblCimsattributeValue.Where(b => b.AttributeCode == lstCustomer[i].AttributeCode
                                  && b.RecordId == rowIdentify).FirstOrDefault();
+                            bool isNew = cimsValue == null;
+                            if (isNew)
+                            { // Add by daibh
+                                cimsValue = new TblCimsattributeValue();
+                                cimsValue.Module = "CIMS";
+                                cimsValue.IsDelete = false;
+                                cimsValue.RecordId = rowIdentify;
+                                cimsValue.CreatedDate = DateTime.Now;
+                                cimsValue.UpdatedBy = username;
+                            }
+
                             cimsValue.AttributeCode = lstCustomer[i].AttributeCode;
                             cimsValue.AttributeValue = lstCustomer[i].AttributeValue;
                             cimsValue.UpdatedDate = DateTime.Now;
-                            db.Entry(cimsValue).State = EntityState.Modified;
+                            cimsValue.UpdatedBy = username;
+
+                            if (isNew)
+                            { // Add by daibh                                
+                                db.TblCimsattributeValue.Add(cimsValue);
+                            }
+                            else
+                            {
+                                db.Entry(cimsValue).State = EntityState.Modified;
+                            }
                             db.SaveChanges();
-                            //lstAttributes.Add(cimsValue);
+
                         }
                     }
                 }
@@ -349,30 +347,15 @@ namespace CIMS.DataAccess
                 {
                     return lstErrs;
                 }
-                //var lst = db.TblVocattributes.Where(v => v.ModuleParent == "CIMS" &&
-                //v.IsDelete == false && lstCustomer.Where(x => x.AttributeCode == v.AttributeCode).Count() == 0).
-                //Select(x => new TblCimsattributeValue()
-                //{
-                //    AttributeCode = x.AttributeCode,
-                   
-                //    AttributeValue = "",
-                //    IsDelete = false,
-                //    RecordId = rowIdentify,
-                //    CreatedDate = DateTime.Now,
-                //});
-                //lstAttributes.AddRange(lst);
-                //db.TblCimsattributeValue.AddRange(lstAttributes);
-                //db.Entry(lstAttributes).State = EntityState.Modified;
-                //db.SaveChanges();
                 return true;
-                
+
 
             }
             else
             {
                 return false;
             }
-           
+
         }
 
 
@@ -384,27 +367,145 @@ namespace CIMS.DataAccess
         /// </summary>
         /// <param name="lstCustomer"></param>
         /// <returns></returns>
-        public object AddCimsValue(List<TblCimsattributeValue> lstCustomer)
+        public object AddCimsValue(List<TblCimsattributeValue> lstCustomer, string username)
         {
             var rowIdentify = DateTime.Now.ToString("yyyyMMddHHmmssfffffff");
-            
+
             const string module = "CIMS";
             try
             {
                 List<object> lstErrs = new List<object>();
                 List<TblCimsattributeValue> lstAttributes = new List<TblCimsattributeValue>();
+
+                TblCimsattributeValue CimsAdd1 = new TblCimsattributeValue();
+
+                CimsAdd1.AttributeCode = "ATTRIBUTE1";
+                CimsAdd1.AttributeValue = username;
+                CimsAdd1.Module = module;
+                CimsAdd1.IsDelete = false;
+                CimsAdd1.RecordId = rowIdentify;
+                CimsAdd1.CreatedDate = DateTime.Now;
+                CimsAdd1.UpdatedBy = username;
+                lstAttributes.Add(CimsAdd1);
+
+                TblCimsattributeValue CimsAdd2 = new TblCimsattributeValue();
+                CimsAdd2.AttributeCode = "ATTRIBUTE2";
+                CimsAdd2.AttributeValue = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                CimsAdd2.Module = module;
+                CimsAdd2.IsDelete = false;
+                CimsAdd2.RecordId = rowIdentify;
+                CimsAdd2.CreatedDate = DateTime.Now;
+                CimsAdd2.UpdatedBy = username;
+                lstAttributes.Add(CimsAdd2);
+
+
+
                 for (int i = 0; i < (lstCustomer.Count); i++)
                 {
-                    var tblVocattributesIsRequired = db.TblVocattributes.Where(a => a.AttributeCode == lstCustomer[i].AttributeCode && a.IsRequired == true).FirstOrDefault();
-                    if (tblVocattributesIsRequired != null)
+                    if (lstCustomer[i].AttributeCode != "ATTRIBUTE1" && lstCustomer[i].AttributeCode != "ATTRIBUTE2")
                     {
-                        if (lstCustomer[i].AttributeValue.Length > 0)
+
+                        var tblVocattributesIsRequired = db.TblVocattributes.Where(a => a.AttributeCode == lstCustomer[i].AttributeCode && a.IsRequired == true).FirstOrDefault();
+                        if (tblVocattributesIsRequired != null)
                         {
+                            if (lstCustomer[i].AttributeValue.Length > 0)
+                            {
+                                TblVocattributes tblVocattributesIsDuplicate = db.TblVocattributes.Where(a => a.AttributeCode == lstCustomer[i].AttributeCode && a.IsDuplicate == true
+                              ).FirstOrDefault();
+                                if (tblVocattributesIsDuplicate != null)
+                                {
+                                    TblCimsattributeValue cimsValue = db.TblCimsattributeValue.Where(b => b.AttributeCode == lstCustomer[i].AttributeCode && b.AttributeValue.ToString().ToLower() == lstCustomer[i].AttributeValue.ToLower()).FirstOrDefault();
+                                    if (cimsValue == null)
+                                    {
+                                        TblVocattributes attcheck = db.TblVocattributes.Where(a => a.AttributeCode == lstCustomer[i].AttributeCode && a.IsReuse == true).FirstOrDefault();
+
+                                        if (attcheck == null)
+                                        {
+                                            TblCimsattributeValue CimsAdd = new TblCimsattributeValue();
+                                            CimsAdd.AttributeCode = lstCustomer[i].AttributeCode;
+                                            CimsAdd.AttributeValue = lstCustomer[i].AttributeValue;
+                                            CimsAdd.Module = module;
+                                            CimsAdd.IsDelete = false;
+                                            CimsAdd.RecordId = rowIdentify;
+                                            CimsAdd.CreatedDate = DateTime.Now;
+                                            CimsAdd.UpdatedBy = username;
+                                            lstAttributes.Add(CimsAdd);
+                                        }
+                                        else
+                                        {
+                                            string currDate = DateTime.Now.ToString("yyyyMMddHHmmssfffffff");
+                                            TblCimsattributeValue CimsAdd = new TblCimsattributeValue();
+                                            CimsAdd.AttributeCode = lstCustomer[i].AttributeCode;
+                                            CimsAdd.AttributeValue = "CUS." + currDate;
+                                            CimsAdd.Module = module;
+                                            CimsAdd.IsDelete = false;
+                                            CimsAdd.RecordId = rowIdentify;
+                                            CimsAdd.CreatedDate = DateTime.Now;
+                                            CimsAdd.UpdatedBy = username;
+                                            lstAttributes.Add(CimsAdd);
+                                        }
+
+
+                                    }
+                                    else
+                                    {
+                                        lstErrs.Add(new
+                                        {
+                                            field = tblVocattributesIsDuplicate.AttributeCode,
+                                            name = tblVocattributesIsDuplicate.AttributeLabel,
+                                            message = "NotDuplicate"
+                                        });
+                                    }
+                                }
+                                else
+                                {
+                                    TblVocattributes attcheck = db.TblVocattributes.Where(a => a.AttributeCode == lstCustomer[i].AttributeCode && a.IsReuse == true).FirstOrDefault();
+
+                                    if (attcheck == null)
+                                    {
+                                        TblCimsattributeValue CimsAdd = new TblCimsattributeValue();
+                                        CimsAdd.AttributeCode = lstCustomer[i].AttributeCode;
+                                        CimsAdd.AttributeValue = lstCustomer[i].AttributeValue;
+                                        CimsAdd.Module = module;
+                                        CimsAdd.IsDelete = false;
+                                        CimsAdd.RecordId = rowIdentify;
+                                        CimsAdd.CreatedDate = DateTime.Now;
+                                        CimsAdd.UpdatedBy = username;
+                                        lstAttributes.Add(CimsAdd);
+                                    }
+                                    else
+                                    {
+                                        string currDate = DateTime.Now.ToString("yyyyMMddHHmmssfffffff");
+                                        TblCimsattributeValue CimsAdd = new TblCimsattributeValue();
+                                        CimsAdd.AttributeCode = lstCustomer[i].AttributeCode;
+                                        CimsAdd.AttributeValue = "CUS." + currDate;
+                                        CimsAdd.Module = module;
+                                        CimsAdd.IsDelete = false;
+                                        CimsAdd.RecordId = rowIdentify;
+                                        CimsAdd.CreatedDate = DateTime.Now;
+                                        CimsAdd.UpdatedBy = username;
+                                        lstAttributes.Add(CimsAdd);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                lstErrs.Add(new
+                                {
+                                    field = tblVocattributesIsRequired.AttributeCode,
+                                    name = tblVocattributesIsRequired.AttributeLabel,
+                                    message = "NotNull"
+                                });
+                            }
+                        }
+                        else
+                        {
+
                             TblVocattributes tblVocattributesIsDuplicate = db.TblVocattributes.Where(a => a.AttributeCode == lstCustomer[i].AttributeCode && a.IsDuplicate == true
-                          ).FirstOrDefault();
+                            ).FirstOrDefault();
                             if (tblVocattributesIsDuplicate != null)
                             {
-                                TblCimsattributeValue cimsValue = db.TblCimsattributeValue.Where(b => b.AttributeCode == lstCustomer[i].AttributeCode && b.AttributeValue.ToString() == lstCustomer[i].AttributeValue).FirstOrDefault();
+                                TblCimsattributeValue cimsValue = db.TblCimsattributeValue.Where(b => b.AttributeCode == tblVocattributesIsDuplicate.AttributeCode && b.AttributeValue.ToString().ToLower() == lstCustomer[i].AttributeValue.ToLower()).FirstOrDefault();
                                 if (cimsValue == null)
                                 {
                                     TblVocattributes attcheck = db.TblVocattributes.Where(a => a.AttributeCode == lstCustomer[i].AttributeCode && a.IsReuse == true).FirstOrDefault();
@@ -418,6 +519,7 @@ namespace CIMS.DataAccess
                                         CimsAdd.IsDelete = false;
                                         CimsAdd.RecordId = rowIdentify;
                                         CimsAdd.CreatedDate = DateTime.Now;
+                                        CimsAdd.UpdatedBy = username;
                                         lstAttributes.Add(CimsAdd);
                                     }
                                     else
@@ -425,15 +527,14 @@ namespace CIMS.DataAccess
                                         string currDate = DateTime.Now.ToString("yyyyMMddHHmmssfffffff");
                                         TblCimsattributeValue CimsAdd = new TblCimsattributeValue();
                                         CimsAdd.AttributeCode = lstCustomer[i].AttributeCode;
-                                        CimsAdd.AttributeValue = "CUS."+ currDate;
+                                        CimsAdd.AttributeValue = "CUS." + currDate;
                                         CimsAdd.Module = module;
                                         CimsAdd.IsDelete = false;
                                         CimsAdd.RecordId = rowIdentify;
                                         CimsAdd.CreatedDate = DateTime.Now;
+                                        CimsAdd.UpdatedBy = username;
                                         lstAttributes.Add(CimsAdd);
                                     }
-
-                                 
                                 }
                                 else
                                 {
@@ -458,6 +559,7 @@ namespace CIMS.DataAccess
                                     CimsAdd.IsDelete = false;
                                     CimsAdd.RecordId = rowIdentify;
                                     CimsAdd.CreatedDate = DateTime.Now;
+                                    CimsAdd.UpdatedBy = username;
                                     lstAttributes.Add(CimsAdd);
                                 }
                                 else
@@ -470,105 +572,24 @@ namespace CIMS.DataAccess
                                     CimsAdd.IsDelete = false;
                                     CimsAdd.RecordId = rowIdentify;
                                     CimsAdd.CreatedDate = DateTime.Now;
+                                    CimsAdd.UpdatedBy = username;
                                     lstAttributes.Add(CimsAdd);
                                 }
                             }
+
                         }
-                        else
-                        {
-                            lstErrs.Add(new
-                            {
-                                field = tblVocattributesIsRequired.AttributeCode,
-                                name = tblVocattributesIsRequired.AttributeLabel,
-                                message = "NotNull"
-                            });
-                        }
+
                     }
-                    else
-                    {
 
-                        TblVocattributes tblVocattributesIsDuplicate = db.TblVocattributes.Where(a => a.AttributeCode == lstCustomer[i].AttributeCode && a.IsDuplicate == true
-                        ).FirstOrDefault();
-                        if (tblVocattributesIsDuplicate != null)
-                        {
-                            TblCimsattributeValue cimsValue = db.TblCimsattributeValue.Where(b => b.AttributeCode == tblVocattributesIsDuplicate.AttributeCode && b.AttributeValue.ToString() == lstCustomer[i].AttributeValue).FirstOrDefault();
-                            if (cimsValue == null )
-                            {
-                                TblVocattributes attcheck = db.TblVocattributes.Where(a => a.AttributeCode == lstCustomer[i].AttributeCode && a.IsReuse == true).FirstOrDefault();
-
-                                if (attcheck == null)
-                                {
-                                    TblCimsattributeValue CimsAdd = new TblCimsattributeValue();
-                                    CimsAdd.AttributeCode = lstCustomer[i].AttributeCode;
-                                    CimsAdd.AttributeValue = lstCustomer[i].AttributeValue;
-                                    CimsAdd.Module = module;
-                                    CimsAdd.IsDelete = false;
-                                    CimsAdd.RecordId = rowIdentify;
-                                    CimsAdd.CreatedDate = DateTime.Now;
-                                    lstAttributes.Add(CimsAdd);
-                                }
-                                else
-                                {
-                                    string currDate = DateTime.Now.ToString("yyyyMMddHHmmssfffffff");
-                                    TblCimsattributeValue CimsAdd = new TblCimsattributeValue();
-                                    CimsAdd.AttributeCode = lstCustomer[i].AttributeCode;
-                                    CimsAdd.AttributeValue = "CUS." + currDate;
-                                    CimsAdd.Module = module;
-                                    CimsAdd.IsDelete = false;
-                                    CimsAdd.RecordId = rowIdentify;
-                                    CimsAdd.CreatedDate = DateTime.Now;
-                                    lstAttributes.Add(CimsAdd);
-                                }
-                            }
-                            else
-                            {
-                                lstErrs.Add(new
-                                {
-                                    field = tblVocattributesIsDuplicate.AttributeCode,
-                                    name = tblVocattributesIsDuplicate.AttributeLabel,
-                                    message = "NotDuplicate"
-                                });
-                            }
-                        }
-                        else
-                        {
-                            TblVocattributes attcheck = db.TblVocattributes.Where(a => a.AttributeCode == lstCustomer[i].AttributeCode && a.IsReuse == true).FirstOrDefault();
-
-                            if (attcheck == null)
-                            {
-                                TblCimsattributeValue CimsAdd = new TblCimsattributeValue();
-                                CimsAdd.AttributeCode = lstCustomer[i].AttributeCode;
-                                CimsAdd.AttributeValue = lstCustomer[i].AttributeValue;
-                                CimsAdd.Module = module;
-                                CimsAdd.IsDelete = false;
-                                CimsAdd.RecordId = rowIdentify;
-                                CimsAdd.CreatedDate = DateTime.Now;
-                                lstAttributes.Add(CimsAdd);
-                            }
-                            else
-                            {
-                                string currDate = DateTime.Now.ToString("yyyyMMddHHmmssfffffff");
-                                TblCimsattributeValue CimsAdd = new TblCimsattributeValue();
-                                CimsAdd.AttributeCode = lstCustomer[i].AttributeCode;
-                                CimsAdd.AttributeValue = "CUS." + currDate;
-                                CimsAdd.Module = module;
-                                CimsAdd.IsDelete = false;
-                                CimsAdd.RecordId = rowIdentify;
-                                CimsAdd.CreatedDate = DateTime.Now;
-                                lstAttributes.Add(CimsAdd);
-                            }
-                        }
-                        
-                    }
                 }
-               
+
                 // list
                 if (lstErrs.Count > 0)
                 {
                     return lstErrs;
                 }
                 var lst = db.TblVocattributes.Where(v => v.ModuleParent == "CIMS" &&
-                v.IsDelete == false && lstCustomer.Where(x => x.AttributeCode == v.AttributeCode).Count() == 0).
+                v.IsDelete == false && lstCustomer.Where(x => x.AttributeCode == v.AttributeCode).Count() == 0 && v.AttributeCode != "ATTRIBUTE1" && v.AttributeCode != "ATTRIBUTE2").
                 Select(x => new TblCimsattributeValue()
                 {
                     AttributeCode = x.AttributeCode,
@@ -577,6 +598,7 @@ namespace CIMS.DataAccess
                     IsDelete = false,
                     RecordId = rowIdentify,
                     CreatedDate = DateTime.Now,
+                    UpdatedBy = username
                 });
                 lstAttributes.AddRange(lst);
                 db.TblCimsattributeValue.AddRange(lstAttributes);
@@ -701,7 +723,7 @@ namespace CIMS.DataAccess
                 {
                     foreach (var item in model.tblVocattributes)
                     {
-                        
+
                         var label = await db.TblVocattributes.Where(x => x.AttributeCode == item.AttributeCode).AsNoTracking().FirstOrDefaultAsync();
                         var attributeEncryption = new TblEncryption();
                         attributeEncryption.AttributeCode = item.AttributeCode;
@@ -712,7 +734,7 @@ namespace CIMS.DataAccess
                         attributeEncryption.EncryptionStatus = true;
                         attributeEncryption.UpdateDate = DateTime.Now;
                         db.TblEncryption.Add(attributeEncryption);
-                        
+
                     }
                     await db.SaveChangesAsync();
                     scope.Complete();

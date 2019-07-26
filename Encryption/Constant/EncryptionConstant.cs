@@ -24,12 +24,18 @@ namespace Encryption.Constant
         public const string SuperAdmin = "SuperAdmin";
         public const string ParentCode = "CRM";
         public const string ADMIN_USER = "ADMIN_USER";
-        
+        public const string ADMIN_USER_NAME = "Quản lý khách hàng";
+        public const string CIMS = "CIMS";
+        public const string HoTen = "Họ tên";
+        public const string DiaChi = "Địa chỉ";
+        public const string FullName = "FullName";
+        public const string Address = "Address";
 
         public const string MS0013 = "Mã hóa trường dữ liệu";
         public const string MS0014 = "Hủy mã hóa trường dữ liệu";
         public const string MS0015 = "Đã áp dụng";
         public const string keyString = "*hTniPGgDukF$eow";
+        public const string ENCRYPTIONKEY = "A1B2C3D4";
 
         public const string Key = "Jwt:Key";
         public const string Issuer = "Jwt:Issuer";

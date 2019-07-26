@@ -51,14 +51,14 @@ namespace OrganizationManagement.Controllers
         [Route("~/api/Organization/GetOrganizationList")]
         [HttpGet]
 
-        public object GetOrganizationList(string DateFrom, string DateTo, string TextSearch, int IsActive, int currPage, int recodperpage)
+        public object GetOrganizationList(string DateFrom, string DateTo, string TextSearch, int IsActive, int currPage, int recordperpage)
         {
             string arr = DateFrom + OrganizationConstant.StringSlipSearch
                          + DateTo + OrganizationConstant.StringSlipSearch
                         + TextSearch + OrganizationConstant.StringSlipSearch
                       + IsActive + OrganizationConstant.StringSlipSearch
                       + currPage + OrganizationConstant.StringSlipSearch
-                      + recodperpage;
+                      + recordperpage;
 
             return _iOrganizationRepository.GetOrganizationList(arr);
         }

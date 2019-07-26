@@ -1,0 +1,85 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\svn\\1.WIP\\04.Development\\02.Source\\API\\AttributesManagement\\AttributesManagement\\AttributesManagement.csproj": {}
+  },
+  "projects": {
+    "D:\\svn\\1.WIP\\04.Development\\02.Source\\API\\AttributesManagement\\AttributesManagement\\AttributesManagement.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\svn\\1.WIP\\04.Development\\02.Source\\API\\AttributesManagement\\AttributesManagement\\AttributesManagement.csproj",
+        "projectName": "AttributesManagement",
+        "projectPath": "D:\\svn\\1.WIP\\04.Development\\02.Source\\API\\AttributesManagement\\AttributesManagement\\AttributesManagement.csproj",
+        "packagesPath": "C:\\Users\\vinhnp\\.nuget\\packages\\",
+        "outputPath": "D:\\svn\\1.WIP\\04.Development\\02.Source\\API\\AttributesManagement\\AttributesManagement\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\vinhnp\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp2.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp2.1": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp2.1": {
+          "dependencies": {
+            "EPPlus.Core": {
+              "target": "Package",
+              "version": "[1.5.4, )"
+            },
+            "Microsoft.AspNetCore.All": {
+              "target": "Package",
+              "version": "[2.1.1, )"
+            },
+            "Microsoft.AspNetCore.App": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.1.1, )",
+              "autoReferenced": true
+            },
+            "Microsoft.AspNetCore.Mvc": {
+              "target": "Package",
+              "version": "[2.1.1, )"
+            },
+            "Microsoft.Extensions.Caching.Redis": {
+              "target": "Package",
+              "version": "[2.1.1, )"
+            },
+            "Microsoft.NETCore.App": {
+              "target": "Package",
+              "version": "[2.1.0, )",
+              "autoReferenced": true
+            },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[2.1.1, )"
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    }
+  }
+}

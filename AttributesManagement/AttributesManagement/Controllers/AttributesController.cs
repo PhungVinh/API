@@ -51,7 +51,7 @@ namespace AttributesManagement.Controllers
                 return BadRequest(ModelState);
             }
 
-            object attributes = new TblVocattributes();
+            object attributes = new TblAttributes();
             ErrorObject response = new ErrorObject();
             ResponseMessage rm = new ResponseMessage();
             FieldErrors error = new FieldErrors();
@@ -100,7 +100,7 @@ namespace AttributesManagement.Controllers
                 }
                 //_attributeRepository.SetStringCache(_organizationCode + AttributeConstant.Attributes_GetListAttributes, _attributeRepository.GetListAttributes(Vocattributes.ModuleParent));
                 //_attributeRepository.GetStringCache(AttributeConstant.Attributes_GetListAttributes);
-                var responeNew = new { TblVocattributes = attributes };
+                var responeNew = new { TblAttributes = attributes };
                 return StatusCode(201, Newtonsoft.Json.JsonConvert.SerializeObject(responeNew));
             }
             else if (code == 0)
@@ -176,14 +176,11 @@ namespace AttributesManagement.Controllers
             int Id = Convert.ToInt32(objAttributes.GetType().GetProperty(AttributeConstant.Id).GetValue(objAttributes, null));
             if (code == 1)
             {
-                //_attributeRepository.SetStringCache(_organizationCode + AttributeConstant.Attributes_GetListAttributes, _attributeRepository.GetListAttributes(Vocattributes.ModuleParent));
-                //_attributeRepository.GetStringCache(AttributeConstant.Attributes_GetListAttributes);
-
                 if (Id >0)
                 {
                     attributes = _attributeRepository.GetObjectAttributes(Id);
                 }
-                var responeNew = new { TblVocattributes = attributes };
+                var responeNew = new { TblAttributes = attributes };
                 return StatusCode(200, Newtonsoft.Json.JsonConvert.SerializeObject(responeNew));
             }
             else if(code == 0)
@@ -288,6 +285,7 @@ namespace AttributesManagement.Controllers
             string userName = User.Claims.FirstOrDefault().Value;
             attributesForm.tblCimsForm.CreateBy = userName;
             attributesForm.tblCimsForm.CreateDate = DateTime.Now;
+            attributesForm.tblCimsForm.ChildCode = AttributeConstant.InformationForm;
             var lstAttribute = _attributeRepository.GetAllAttributeRequired(attributesForm.tblCimsForm.MenuCode);
             var requiredAttributes = lstAttribute.Where(x => !attributesForm.tblCimsattributeForm.Where(c => c.AttributeCode == x.AttributeCode).Select(c => c.AttributeCode).Contains(x.AttributeCode)).Select(x => new InfoAttribute()
             {
@@ -362,6 +360,7 @@ namespace AttributesManagement.Controllers
             string userName = User.Claims.FirstOrDefault().Value;
             attributesForm.tblCimsForm.CreateBy = userName;
             attributesForm.tblCimsForm.CreateDate = DateTime.Now;
+            attributesForm.tblCimsForm.ChildCode = AttributeConstant.ListForm;
             var lstAttribute = _attributeRepository.GetAllAttributeRequired(attributesForm.tblCimsForm.MenuCode);
             var requiredAttributes = lstAttribute.Where(x => !attributesForm.tblCimsattributeForm.Where(c => c.AttributeCode == x.AttributeCode).Select(c => c.AttributeCode).Contains(x.AttributeCode)).Select(x => new InfoAttribute()
             {
@@ -740,11 +739,23 @@ namespace AttributesManagement.Controllers
         }
         [Route("~/api/Attributes/UpdateAttributeFormList")]
         [HttpPut]
+        [Authorize]
         public IActionResult UpdateAttributeFormList(TblCimsattributeForm tblCimsattributeForm)
         {
             if (ModelState.IsValid)
             {
                 return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(_attributeRepository.UpdateAttributeFormList(tblCimsattributeForm)));
+            }
+            return StatusCode(400);
+        }
+        [Route("~/api/Attributes/UpdateTableFormList")]
+        [HttpPut]
+        [Authorize]
+        public IActionResult UpdateTableFormList([FromBody] List<InfoAttribute> table)
+        {
+            if (ModelState.IsValid)
+            {
+                return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(_attributeRepository.UpdateTableFormList(table)));
             }
             return StatusCode(400);
         }

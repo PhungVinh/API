@@ -87,7 +87,7 @@ namespace AttributesManagement.Repositories
         /// </summary>
         /// <param name="menucode"></param>
         /// <returns>List requirement attribute</returns>
-        List<TblVocattributes> GetAllAttributeRequired(string menucode);
+        List<TblAttributes> GetAllAttributeRequired(string menucode);
         /// <summary>
         /// get list constraint by Categorycode
         /// </summary>
@@ -132,6 +132,11 @@ namespace AttributesManagement.Repositories
         /// <param name="attributesId"></param>
         /// <returns></returns>
         int DeleteAttributesConstraint(int attributesId);
+        /// <summary>
+        /// Get All Attribute By Module
+        /// </summary>
+        /// <param name="moduleCode"></param>
+        /// <returns></returns>
         string GetStringCache(string cacheKey);
         void SetStringCache(string cacheKey, Object obj);
         void SetContextFactory(ConnectionStrings connectionStrings);
@@ -143,6 +148,7 @@ namespace AttributesManagement.Repositories
         /// <returns>form of children code</returns>
         object GetAllAttributesCimsWithRowDetails(string childCode);
         object UpdateAttributeFormList(TblCimsattributeForm tblCimsattributeForm);
+        object UpdateTableFormList(List<InfoAttribute> table);
         #endregion
     }
 }

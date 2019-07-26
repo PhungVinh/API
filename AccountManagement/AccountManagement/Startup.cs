@@ -83,7 +83,8 @@ namespace AccountManagement
             services.AddTransient<ILogUserRepository, LogUserLogDA>();
             services.AddTransient<IEmailService, EmailServiceEx>();
             services.AddTransient<IServicePackRepository, ServicePackDA>();
-            AccountConstant.SQL_CONNECTION = Configuration.GetSection("ConnectionStrings").GetSection("MASTERConnection").Value.ToString();
+            //HaiHM Comment line under
+            //AccountConstant.SQL_CONNECTION = Configuration.GetSection("ConnectionStrings").GetSection("MASTERConnection").Value.ToString();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // Using get IP client

@@ -16,8 +16,11 @@ namespace AttributesManagement.Models
         }
 
         public virtual DbSet<TblAttributeAdvanced> TblAttributeAdvanced { get; set; }
+        public virtual DbSet<TblAttributeCondition> TblAttributeCondition { get; set; }
         public virtual DbSet<TblAttributeConstraint> TblAttributeConstraint { get; set; }
         public virtual DbSet<TblAttributeOptions> TblAttributeOptions { get; set; }
+        public virtual DbSet<TblAttributes> TblAttributes { get; set; }
+        public virtual DbSet<TblCalculationFunction> TblCalculationFunction { get; set; }
         public virtual DbSet<TblCategory> TblCategory { get; set; }
         public virtual DbSet<TblCategoryGroup> TblCategoryGroup { get; set; }
         public virtual DbSet<TblCimsattributeForm> TblCimsattributeForm { get; set; }
@@ -25,10 +28,14 @@ namespace AttributesManagement.Models
         public virtual DbSet<TblCimsform> TblCimsform { get; set; }
         public virtual DbSet<TblCimsFormHistory> TblCimsFormHistory { get; set; }
         public virtual DbSet<TblConnectionConfig> TblConnectionConfig { get; set; }
+        public virtual DbSet<TblDependentValues> TblDependentValues { get; set; }
         public virtual DbSet<TblEncryption> TblEncryption { get; set; }
+        public virtual DbSet<TblGeneratingValues> TblGeneratingValues { get; set; }
         public virtual DbSet<TblReferenceConstraint> TblReferenceConstraint { get; set; }
+        public virtual DbSet<TblTabBar> TblTabBar { get; set; }
+        public virtual DbSet<TblTabControl> TblTabControl { get; set; }
+        public virtual DbSet<TblTabValueShow> TblTabValueShow { get; set; }
         public virtual DbSet<TblVocattributeForm> TblVocattributeForm { get; set; }
-        public virtual DbSet<TblVocattributes> TblVocattributes { get; set; }
         public virtual DbSet<TblVocform> TblVocform { get; set; }
         public virtual DbSet<TblVocstepAttributes> TblVocstepAttributes { get; set; }
         public virtual DbSet<TblVocstepAttributesValue> TblVocstepAttributesValue { get; set; }
@@ -38,6 +45,7 @@ namespace AttributesManagement.Models
 
         // Unable to generate entity type for table 'dbo.TempShow'. Please see the warning messages.
         // Unable to generate entity type for table 'dbo.tblCustomer'. Please see the warning messages.
+        // Unable to generate entity type for table 'dbo.tblDependent'. Please see the warning messages.
 
 //        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 //        {
@@ -71,6 +79,29 @@ namespace AttributesManagement.Models
                 entity.Property(e => e.UpdateBy).HasMaxLength(50);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<TblAttributeCondition>(entity =>
+            {
+                entity.ToTable("tblAttributeCondition");
+
+                entity.Property(e => e.AttributeCode)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ConditionCode)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ConditionValue).HasMaxLength(300);
+
+                entity.Property(e => e.FunctionCode)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ModuleCode)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<TblAttributeConstraint>(entity =>
@@ -113,19 +144,97 @@ namespace AttributesManagement.Models
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
             });
 
+            modelBuilder.Entity<TblAttributes>(entity =>
+            {
+                entity.HasKey(e => e.AttributesId);
+
+                entity.ToTable("tblAttributes");
+
+                entity.Property(e => e.AttributeCode).HasMaxLength(50);
+
+                entity.Property(e => e.AttributeDescription).HasMaxLength(500);
+
+                entity.Property(e => e.AttributeLabel).HasMaxLength(100);
+
+                entity.Property(e => e.AttributeType).HasMaxLength(50);
+
+                entity.Property(e => e.CategoryParentCode)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.CreateBy).HasMaxLength(50);
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.DataType).HasMaxLength(50);
+
+                entity.Property(e => e.DefaultValue).HasMaxLength(200);
+
+                entity.Property(e => e.DefaultValueWithTextBox).HasMaxLength(200);
+
+                entity.Property(e => e.DescriptionTooltip).HasMaxLength(500);
+
+                entity.Property(e => e.DetailRefer).HasMaxLength(500);
+
+                entity.Property(e => e.DisplayFormValue).HasMaxLength(500);
+
+                entity.Property(e => e.InputFieldValue)
+                    .HasMaxLength(250)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.IsDisplayFormat)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.IsReuse)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ModuleParent).HasMaxLength(100);
+
+                entity.Property(e => e.RuleInputValue)
+                    .HasMaxLength(250)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.UpDateBy).HasMaxLength(50);
+
+                entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<TblCalculationFunction>(entity =>
+            {
+                entity.ToTable("tblCalculationFunction");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.InputValue)
+                    .HasMaxLength(250)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.IsInputValue)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SelectValue)
+                    .HasMaxLength(150)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<TblCategory>(entity =>
             {
                 entity.ToTable("tblCategory");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.CategoryCode).HasMaxLength(50);
+                entity.Property(e => e.CategoryCode).HasMaxLength(200);
 
                 entity.Property(e => e.CategoryDescription).HasMaxLength(500);
 
                 entity.Property(e => e.CategoryName).HasMaxLength(200);
 
-                entity.Property(e => e.CategoryTypeCode).HasMaxLength(50);
+                entity.Property(e => e.CategoryTypeCode).HasMaxLength(200);
 
                 entity.Property(e => e.CreateBy).HasMaxLength(50);
 
@@ -262,6 +371,43 @@ namespace AttributesManagement.Models
                 entity.Property(e => e.ConnectionValue).HasMaxLength(255);
             });
 
+            modelBuilder.Entity<TblDependentValues>(entity =>
+            {
+                entity.ToTable("tblDependentValues");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.AttributeCode).HasMaxLength(250);
+
+                entity.Property(e => e.AttributeCondition)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.AttributeInfomation)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.CalculatingDetail)
+                    .HasMaxLength(150)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.CalculatingType).HasMaxLength(250);
+
+                entity.Property(e => e.ConditionCode)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ConditionValue).HasMaxLength(300);
+
+                entity.Property(e => e.FunctionCode)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ModuleCode)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<TblEncryption>(entity =>
             {
                 entity.HasKey(e => e.EncryptionId);
@@ -276,13 +422,38 @@ namespace AttributesManagement.Models
 
                 entity.Property(e => e.CreatedBy).HasMaxLength(50);
 
+                entity.Property(e => e.Field).HasMaxLength(50);
+
                 entity.Property(e => e.ModuleName).HasMaxLength(50);
+
+                entity.Property(e => e.OrgCode).HasMaxLength(50);
 
                 entity.Property(e => e.ParentCode).HasMaxLength(50);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 
                 entity.Property(e => e.UpdatedBy).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<TblGeneratingValues>(entity =>
+            {
+                entity.ToTable("tblGeneratingValues");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.AttributeCode).HasMaxLength(50);
+
+                entity.Property(e => e.ExclusionCharacters).HasMaxLength(150);
+
+                entity.Property(e => e.InputFormat).HasMaxLength(250);
+
+                entity.Property(e => e.IsReuse)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.MenuCode).HasMaxLength(150);
+
+                entity.Property(e => e.RequiredCharacters).HasMaxLength(150);
             });
 
             modelBuilder.Entity<TblReferenceConstraint>(entity =>
@@ -294,48 +465,68 @@ namespace AttributesManagement.Models
                 entity.Property(e => e.MenuCode).HasMaxLength(50);
             });
 
+            modelBuilder.Entity<TblTabBar>(entity =>
+            {
+                entity.ToTable("tblTabBar");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.CreateBy).HasMaxLength(150);
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.MenuCode).HasMaxLength(250);
+
+                entity.Property(e => e.TabObject).HasMaxLength(250);
+
+                entity.Property(e => e.UpdateBy).HasMaxLength(150);
+
+                entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<TblTabControl>(entity =>
+            {
+                entity.ToTable("tblTabControl");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.DependentField)
+                    .HasMaxLength(150)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.DisplayFormat).HasMaxLength(150);
+
+                entity.Property(e => e.ModuleCode).HasMaxLength(150);
+
+                entity.Property(e => e.TabCode).HasMaxLength(250);
+
+                entity.Property(e => e.TabObject).HasMaxLength(150);
+
+                entity.Property(e => e.Title).HasMaxLength(500);
+            });
+
+            modelBuilder.Entity<TblTabValueShow>(entity =>
+            {
+                entity.ToTable("tblTabValueShow");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.AttributeCode).HasMaxLength(150);
+
+                entity.Property(e => e.TabCode).HasMaxLength(250);
+            });
+
             modelBuilder.Entity<TblVocattributeForm>(entity =>
             {
                 entity.HasKey(e => e.AttributeFormId);
 
                 entity.ToTable("tblVOCAttributeForm");
-            });
-
-            modelBuilder.Entity<TblVocattributes>(entity =>
-            {
-                entity.HasKey(e => e.AttributesId);
-
-                entity.ToTable("tblVOCAttributes");
-
-                entity.Property(e => e.AttributeCode).HasMaxLength(50);
-
-                entity.Property(e => e.AttributeDescription).HasMaxLength(500);
-
-                entity.Property(e => e.AttributeLabel).HasMaxLength(100);
-
-                entity.Property(e => e.AttributeType).HasMaxLength(50);
-
-                entity.Property(e => e.CategoryParentCode)
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.CreateBy).HasMaxLength(50);
-
-                entity.Property(e => e.CreateDate).HasColumnType("datetime");
-
-                entity.Property(e => e.DataType).HasMaxLength(50);
-
-                entity.Property(e => e.DefaultValue).HasMaxLength(200);
-
-                entity.Property(e => e.DefaultValueWithTextBox).HasMaxLength(200);
-
-                entity.Property(e => e.DetailRefer).HasMaxLength(500);
-
-                entity.Property(e => e.ModuleParent).HasMaxLength(100);
-
-                entity.Property(e => e.UpDateBy).HasMaxLength(50);
-
-                entity.Property(e => e.UpdateDate).HasColumnType("datetime");
             });
 
             modelBuilder.Entity<TblVocform>(entity =>

@@ -18,5 +18,7 @@ namespace Encryption.Models
         public bool? IsDone { get; set; }
         public string ModuleName { get; set; }
         public bool? FinalizationStatus { get; set; }
+        public string OrgCode { get; set; }
+        public string Field { get; set; }
     }
 }

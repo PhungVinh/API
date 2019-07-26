@@ -11,11 +11,12 @@ namespace AttributesManagement.Models
         public int AttrOrder { get; set; }
         public int AttributeColumn { get; set; }
         public string AttributeDescription { get; set; }
-        public int? AttributeWidth { get; set; }
+        public int? MaximumLength { get; set; }
+        public int? MinimumLength { get; set; }
         public string CategoryParentCode { get; set; }
         public string[] DetailRefer { get; set; }
         //public bool? IsDuplicate { get; set; }
-        public bool? IsReuse { get; set; }
+        public string IsReuse { get; set; }
         public bool? IsVisible { get; set; }
         public string DefaultValueWithTextBox { get; set; }
         public bool? IsShowLabel { get; set; }

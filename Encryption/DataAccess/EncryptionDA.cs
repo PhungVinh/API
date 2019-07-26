@@ -30,16 +30,7 @@ namespace Encryption.DataAccess
 
         public EncryptionDA()
         {
-            lst = new List<string>() { "Tài khoản người dùng",
-                                        "Tên đầy đủ",
-                                        "Email",
-                                        "Số điện thoại",
-                                        "Ảnh",
-                                        "Địa chỉ",
-                                        "Giới tính",
-                                        "Ngày sinh",
-                                        "Mã đơn vị"};
-
+            lst = new List<string>() { "Họ tên", "Địa chỉ" };
         }
         public void LoadContext(string orgCode, IDistributedCache distributedCache)
         {
@@ -57,6 +48,9 @@ namespace Encryption.DataAccess
         {
             try
             {
+                MenuDTO menuDTO = new MenuDTO();
+                List<TblEncryption> tblEncryptions = new List<TblEncryption>();
+                menuDTO.SchedulerTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 02, 00, 00);
                 var moduleName = GetListModule(EncryptionConstant.MASTER).Response;
                 List<TblMasterMenu> lstMenu = new List<TblMasterMenu>();
                 foreach (var item in moduleName)
@@ -65,24 +59,28 @@ namespace Encryption.DataAccess
                     tblMasterMenu = item as TblMasterMenu;
                     lstMenu.Add(tblMasterMenu);
                 }
-                var data = await db.TblEncryption.Select(x => new EncryptionDTO()
+                var orderByCreateDate = await db.TblEncryption.Where(x => x.UpdateDate == null).OrderByDescending(x => x.CreateDate).ToListAsync();
+                var orderByUpdateDate = await db.TblEncryption.Where(x => x.UpdateDate != null).OrderByDescending(x => x.UpdateDate).ToListAsync();
+                tblEncryptions.AddRange(orderByCreateDate);
+                tblEncryptions.AddRange(orderByUpdateDate);
+                menuDTO.AttributesEncryption = tblEncryptions.Select(x => new EncryptionDTO()
                 {
                     AttributeCode = x.AttributeCode,
                     AttributeLabel = x.AttributeLabel,
                     ModuleName = x.ModuleName,
                     MenuCode = x.ParentCode,
                     UpdateDate = x.UpdateDate,
-                    ExecuteTime = x.IsDone == true ? EncryptionConstant.MS0015 : common.GetTimeExecuteEncrpytion(x.UpdateDate),
+                    ExecuteTime = x.IsDone == true ? null : common.GetTimeExecuteEncrpytion(x.UpdateDate == null ? DateTime.Now : x.UpdateDate),
                     EncryptionStatus = x.EncryptionStatus
-                }).AsNoTracking().OrderByDescending(x => x.UpdateDate).ToListAsync();
-                return new ResponseDTO() { StatusCode = 200, Response = data };
+                }).ToList();                
+                return new ResponseDTO() { StatusCode = 200, Response = menuDTO };
             }
             catch (Exception ex)
             {
                 return new ResponseDTO() { StatusCode = 500, Response = ex.Message };
             }
         }
-        public ResponseDTO UpdateEncrpytion(AttributeModel model)
+        public ResponseDTO UpdateEncrpytion(AttributeModel model, string orgCode)
         {
             using (TransactionScope scope = new TransactionScope())
             {
@@ -105,17 +103,17 @@ namespace Encryption.DataAccess
                                     // Kiểm tra trạng thái mã hóa của trường dữ liệu
                                     if (result.EncryptionStatus == true)
                                     {
-                                        result.UpdateDate = DateTime.Now;
                                         result.EncryptionStatus = false;
                                         result.UpdatedBy = model.UserName;
+                                        //result.IsDone = true;
                                         result.IsDone = false;
                                         db.Entry(result).State = EntityState.Modified;
                                     }
                                     else
                                     {
-                                        result.UpdateDate = DateTime.Now;
                                         result.EncryptionStatus = true;
                                         result.UpdatedBy = model.UserName;
+                                        //result.IsDone = true;
                                         result.IsDone = false;
                                         db.Entry(result).State = EntityState.Modified;
                                     }
@@ -134,47 +132,51 @@ namespace Encryption.DataAccess
                             {
                                 var attributeEncryption = new TblEncryption();
                                 attributeEncryption.AttributeCode = item.AttributeCode;
-                                attributeEncryption.AttributeLabel = item.AttributeLabel;
+                                if (item.AttributeLabel == EncryptionConstant.HoTen)
+                                {
+                                    attributeEncryption.AttributeLabel = item.AttributeLabel;
+                                    attributeEncryption.Field = EncryptionConstant.FullName;
+                                }
+                                if (item.AttributeLabel == EncryptionConstant.DiaChi)
+                                {
+                                    attributeEncryption.AttributeLabel = item.AttributeLabel;
+                                    attributeEncryption.Field = EncryptionConstant.Address;
+                                }
                                 attributeEncryption.CreatedBy = model.UserName;
                                 attributeEncryption.CreateDate = DateTime.Now;
                                 attributeEncryption.ParentCode = item.ParentCode;
                                 attributeEncryption.ModuleName = item.ModuleName;
                                 attributeEncryption.EncryptionStatus = true;
-                                attributeEncryption.UpdateDate = DateTime.Now;
+                                attributeEncryption.OrgCode = orgCode;
                                 attributeEncryption.IsFirst = true;
                                 attributeEncryption.IsDone = false;
                                 db.TblEncryption.Add(attributeEncryption);
                             }
                             else
                             {
-                                var label = db.TblVocattributes.Where(x => x.AttributeCode == item.AttributeCode && x.ModuleParent == item.ParentCode).AsNoTracking().FirstOrDefault();
-                                if (label != null)
-                                {
-                                    var attributeEncryption = new TblEncryption();
-                                    attributeEncryption.AttributeCode = item.AttributeCode;
-                                    attributeEncryption.AttributeLabel = label.AttributeLabel;
-                                    attributeEncryption.CreatedBy = model.UserName;
-                                    attributeEncryption.CreateDate = DateTime.Now;
-                                    attributeEncryption.ParentCode = item.ParentCode;
-                                    attributeEncryption.ModuleName = item.ModuleName;
-                                    attributeEncryption.EncryptionStatus = true;
-                                    attributeEncryption.UpdateDate = DateTime.Now;
-                                    attributeEncryption.IsFirst = true;
-                                    attributeEncryption.IsDone = false;
-                                    db.TblEncryption.Add(attributeEncryption);
-                                }
+                                var attributeEncryption = new TblEncryption();
+                                attributeEncryption.AttributeCode = item.AttributeCode;
+                                attributeEncryption.AttributeLabel = item.AttributeLabel;
+                                attributeEncryption.CreatedBy = model.UserName;
+                                attributeEncryption.CreateDate = DateTime.Now;
+                                attributeEncryption.ParentCode = item.ParentCode;
+                                attributeEncryption.ModuleName = item.ModuleName;
+                                attributeEncryption.EncryptionStatus = true;
+                                attributeEncryption.OrgCode = orgCode;
+                                attributeEncryption.IsFirst = true;
+                                attributeEncryption.IsDone = false;
+                                db.TblEncryption.Add(attributeEncryption);
                             }
                         }
                     }
+                    db.SaveChanges();
+                    scope.Complete();
+                    return new ResponseDTO() { StatusCode = 200, Response = EncryptionConstant.MS0013 };
                 }
                 catch (Exception ex)
                 {
                     return new ResponseDTO() { StatusCode = 500, Response = ex.Message };
                 }
-
-                db.SaveChanges();
-                scope.Complete();
-                return new ResponseDTO() { StatusCode = 200, Response = EncryptionConstant.MS0013 };
             }
         }
         public async void SchedulerExecuteEncrpytion(IScheduler scheduler)
@@ -221,7 +223,8 @@ namespace Encryption.DataAccess
                         tblMasterMenu.ModuleName = lstMenu.Where(x => x.MenuCode == EncryptionConstant.ADMIN_USER).FirstOrDefault().MenuName;
                         lstTblMasterMenus.Add(tblMasterMenu);
                     }
-                    return new ResponseDTO() { StatusCode = 200, Response = lstTblMasterMenus };
+                    var lstMenuAdminUser = lstTblMasterMenus.Where(x => !db.TblEncryption.Where(c => c.AttributeCode == x.AttributeCode && c.OrgCode == orgCode).Select(c => c.AttributeCode).Contains(x.AttributeCode)).ToList();
+                    return new ResponseDTO() { StatusCode = 200, Response = lstMenuAdminUser };
                 }
                 else
                 {
@@ -300,7 +303,23 @@ namespace Encryption.DataAccess
             try
             {
                 var data = common.GetAllModule().ToList();
-                return new ResponseDTO() { StatusCode = 200, Response = data[0] };
+                List<TblMasterMenu> lstMenu = new List<TblMasterMenu>();
+                foreach (var item in data[0])
+                {
+                    TblMasterMenu tblMasterMenu = new TblMasterMenu();
+                    tblMasterMenu = item as TblMasterMenu;
+                    if (tblMasterMenu.MenuName == EncryptionConstant.ADMIN_USER_NAME)
+                    {
+                        tblMasterMenu.MenuCode = EncryptionConstant.CIMS;
+                        lstMenu.Add(tblMasterMenu);
+                    }
+                    else
+                    {
+                        lstMenu.Add(tblMasterMenu);
+                    }
+
+                }
+                return new ResponseDTO() { StatusCode = 200, Response = lstMenu };
             }
             catch (Exception ex)
             {

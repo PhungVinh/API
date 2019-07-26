@@ -16,6 +16,7 @@ namespace CIMS.Constant
         public const string ConnectionAdd = "Connection";
         public const string DataType = "DataCode";
         public const string Control = "control";
+        public const string ModuleCIMS = "CIMS";
 
 
         public const string NoDelete = "Không có dữ liệu để xóa!";

@@ -15,24 +15,9 @@ namespace Encryption.Common
 {
     public class EncryptionCommon
     {
-        public string CreateKey(int length = 16)
-        {
-            // Create a string of characters, numbers, special characters that allowed in the password  
-            string validChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
-            Random random = new Random();
-
-            // Select one random character at a time from the string  
-            // and create an array of chars  
-            char[] chars = new char[length];
-            for (int i = 0; i < length; i++)
-            {
-                chars[i] = validChars[random.Next(0, validChars.Length)];
-            }
-            return new string(chars);
-        }
         public string EncryptStringAES(string text, string keyString)
         {
-            var key = Encoding.UTF8.GetBytes(keyString);
+            var key = ToByteArray(keyString);
 
             using (var aesAlg = Aes.Create())
             {
@@ -45,12 +30,16 @@ namespace Encryption.Common
                         {
                             swEncrypt.Write(text);
                         }
+
                         var iv = aesAlg.IV;
+
                         var decryptedContent = msEncrypt.ToArray();
+
                         var result = new byte[iv.Length + decryptedContent.Length];
 
                         Buffer.BlockCopy(iv, 0, result, 0, iv.Length);
                         Buffer.BlockCopy(decryptedContent, 0, result, iv.Length, decryptedContent.Length);
+
                         return Convert.ToBase64String(result);
                     }
                 }
@@ -66,7 +55,7 @@ namespace Encryption.Common
             Buffer.BlockCopy(fullCipher, 0, iv, 0, iv.Length);
             Buffer.BlockCopy(fullCipher, iv.Length, cipher, 0, fullCipher.Length - 16);
 
-            var key = Encoding.UTF8.GetBytes(keyString);
+            var key = ToByteArray(keyString);
 
             using (var aesAlg = Aes.Create())
             {
@@ -90,15 +79,15 @@ namespace Encryption.Common
         }
         public string GetTimeExecuteEncrpytion(DateTime? _dateTime)
         {
-            DateTime dateTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59);
-            var executeTime = string.Format("{0:hh\\:mm\\:ss}", dateTime.Subtract(_dateTime.HasValue ? _dateTime.Value : _dateTime.Value));
+            DateTime dateTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 01, 00, 00);
+            var executeTime = string.Format("{0:hh\\:mm\\:ss}", dateTime.AddDays(1).Subtract(_dateTime.HasValue ? _dateTime.Value : _dateTime.Value));
             return executeTime;
         }
 
         public List<List<dynamic>> GetAllModule()
         {
             return ExecuteMultipleResults(EncryptionConstant.MASTER_STORE_PROC, null, EncryptionConstant.SQL_MASTER_CONNECTION, typeof(TblMasterMenu));
-        }      
+        }
         /// <summary>
         /// Executes the specified parameters.
         /// </summary>
@@ -161,6 +150,29 @@ namespace Encryption.Common
                 command.Connection.Close();
             }
             return results;
+        }
+        public static byte[] ToByteArray(string value)
+        {
+            byte[] bytes = new byte[16];
+            byte[] strByte = Encoding.UTF8.GetBytes(value);
+            for (int i = 0; i < 16; i++)
+            {
+                if (i < strByte.Length)
+                {
+                    bytes[i] = strByte[i];
+                }
+                else
+                {
+                    bytes[i] = 0;
+                }
+            }
+            return bytes;
+        }
+        public string GenerateEncryptionKey(string orgCode)
+        {
+            string result = string.Empty;
+            result = orgCode + EncryptionConstant.ENCRYPTIONKEY;
+            return result;
         }
     }
 }

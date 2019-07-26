@@ -10,10 +10,14 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Transactions;
+using System.Data;
+using System.IO;
+using OfficeOpenXml;
+using System.Text;
 
 namespace AttributesManagement.DataAccess
 {
-    public class CategoryDA: IcategoryRepository
+    public class CategoryDA : IcategoryRepository
     {
         public CategoryDA()
         {
@@ -58,31 +62,40 @@ namespace AttributesManagement.DataAccess
             try
             {
                 string cateCode = LocDau(tblCategory.CategoryName).ToUpper();
+                string cateCode1= (cateCode != "") ? Regex1(cateCode, CategoryConstant.regex, CategoryConstant.Space) : "";
                 TblCategoryGroup addCateGroup = new TblCategoryGroup();
                 TblCategory addCategory = new TblCategory();
-                TblCategory checkCategoryName = db.TblCategory.Where(v => v.CategoryName.ToLower().TrimStart().TrimEnd() == tblCategory.CategoryName.ToLower().TrimStart().TrimEnd()).FirstOrDefault();
-                TblCategoryGroup checkCategoryGroupName = db.TblCategoryGroup.Where(v => v.CategoryGroupName.ToLower().TrimStart().TrimEnd() == tblCategory.CategoryName.ToLower().TrimStart().TrimEnd()).FirstOrDefault();
+                TblCategory checkCateCode = db.TblCategory.Where(v => v.CategoryCode == cateCode1 && v.IsDelete == false).FirstOrDefault();
+                TblCategoryGroup checkCateGroup = db.TblCategoryGroup.Where(v => v.CategoryCode == cateCode1 && v.IsDelete == false).FirstOrDefault();
+
                 if (tblCategory.CategoryTypeCode != "")
                 {
-                    if(checkCategoryGroupName == null)
+                    if(checkCateCode == null)
                     {
-                        using (var ts = new TransactionScope())
+                        if (checkCateGroup == null)
                         {
-                            addCateGroup.CategoryCode = (cateCode != "") ? Regex1(cateCode, CategoryConstant.regex, CategoryConstant.Space) : "";
-                            addCateGroup.CategoryTypeCode = tblCategory.CategoryTypeCode;
-                            addCateGroup.CategoryGroupName = tblCategory.CategoryName;
-                            addCateGroup.CategoryDescription = tblCategory.CategoryDescription;
-                            addCateGroup.CreateBy = tblCategory.CreateBy;
-                            addCateGroup.CreateDate = DateTime.Now;
-                            addCateGroup.IsDelete = false;
-                            db.TblCategoryGroup.Add(addCateGroup);
-                            code = db.SaveChanges();
-                            if (tblCategory.children.Count > 0)
+                            using (var ts = new TransactionScope())
                             {
-                                AddCategoryChild(addCateGroup.CategoryCode, tblCategory.children);
+                                addCateGroup.CategoryCode = cateCode1;
+                                addCateGroup.CategoryTypeCode = tblCategory.CategoryTypeCode;
+                                addCateGroup.CategoryGroupName = tblCategory.CategoryName;
+                                addCateGroup.CategoryDescription = tblCategory.CategoryDescription;
+                                addCateGroup.CreateBy = tblCategory.CreateBy;
+                                addCateGroup.CreateDate = DateTime.Now;
+                                addCateGroup.IsDelete = false;
+                                db.TblCategoryGroup.Add(addCateGroup);
+                                code = db.SaveChanges();
+                                if (tblCategory.children.Count > 0)
+                                {
+                                    AddCategoryChild(addCateGroup.CategoryCode, tblCategory.children);
+                                }
+                                objCategory = new { code = code, CategoryCode = addCateGroup.CategoryCode };
+                                ts.Complete();
                             }
-                            objCategory = new { code = code, CategoryCode = addCateGroup.CategoryCode };
-                            ts.Complete();
+                        }
+                        else
+                        {
+                            objCategory = new { code = code, CategoryCode = "" };
                         }
                     }
                     else
@@ -92,13 +105,13 @@ namespace AttributesManagement.DataAccess
                 }
                 else
                 {
-                    if(checkCategoryGroupName == null)
+                    if(checkCateGroup == null)
                     {
-                        if (checkCategoryName == null)
+                        if (checkCateCode == null)
                         {
                             using (var ts = new TransactionScope())
                             {
-                                addCategory.CategoryCode = (cateCode != "") ? Regex1(cateCode, CategoryConstant.regex, CategoryConstant.Space) : "";
+                                addCategory.CategoryCode = cateCode1;
                                 addCategory.CategoryTypeCode = tblCategory.CategoryTypeCode;
                                 addCategory.CategoryName = tblCategory.CategoryName;
                                 addCategory.CategoryDescription = tblCategory.CategoryDescription;
@@ -146,28 +159,32 @@ namespace AttributesManagement.DataAccess
                 int code = 0;
                 object objCategory = new object();
                 string cateCode = LocDau(tblCategory.CategoryName).ToUpper();
+                string cateCode1= (cateCode != "") ? Regex1(cateCode, CategoryConstant.regex, CategoryConstant.Space) : "";
+                TblCategoryGroup checkCateGroup = db.TblCategoryGroup.Where(v => v.CategoryCode == tblCategory.CategoryCode && v.IsDelete == false).FirstOrDefault();
+                TblCategory checkCateCode = db.TblCategory.Where(v => v.CategoryCode == tblCategory.CategoryCode && v.IsDelete == false).FirstOrDefault();
                 if (tblCategory.CategoryTypeCode != "")
                 {
-                    TblCategoryGroup checkCateGroup = db.TblCategoryGroup.Where(v => v.CategoryCode == tblCategory.CategoryCode).FirstOrDefault();
                     if (checkCateGroup != null)
                     {
-                        if (checkCateGroup.CategoryGroupName.ToLower().TrimStart().TrimEnd() == tblCategory.CategoryName.ToLower().TrimStart().TrimEnd())
+                        TblCategoryGroup checkCategoryCode_New = db.TblCategoryGroup.Where(v => v.CategoryCode == cateCode1 && v.CategoryGroupName.ToLower().TrimStart().TrimEnd() == tblCategory.CategoryName.ToLower().TrimStart().TrimEnd() && v.IsDelete == false).FirstOrDefault();
+                        if(checkCategoryCode_New != null)
                         {
                             using (var ts = new TransactionScope())
                             {
-                                checkCateGroup.CategoryCode = (cateCode != "") ? Regex1(cateCode, CategoryConstant.regex, CategoryConstant.Space) : "";
+                                checkCateGroup.CategoryCode = cateCode1;
                                 checkCateGroup.CategoryGroupName = tblCategory.CategoryName;
                                 checkCateGroup.CategoryTypeCode = tblCategory.CategoryTypeCode;
                                 checkCateGroup.CategoryDescription = tblCategory.CategoryDescription;
                                 checkCateGroup.UpdateBy = tblCategory.UpdateBy;
                                 checkCateGroup.UpdateDate = DateTime.Now;
+                                checkCateGroup.IsDelete = false;
                                 db.Entry(checkCateGroup).State = EntityState.Modified;
                                 code = db.SaveChanges();
-                                if (tblCategory.children != null)
+                                if (tblCategory.children.Count > 0)
                                 {
                                     AddCategoryChild(checkCateGroup.CategoryCode, tblCategory.children);
                                 }
-                                if (tblCategory.deleteCategory !=null)
+                                if (tblCategory.deleteCategory.Count > 0)
                                 {
                                     DeleteCategoryChild(tblCategory.deleteCategory);
                                 }
@@ -177,8 +194,8 @@ namespace AttributesManagement.DataAccess
                         }
                         else
                         {
-                            TblCategoryGroup checkGroupName = db.TblCategoryGroup.Where(v => v.CategoryGroupName.ToLower().TrimStart().TrimEnd() == tblCategory.CategoryName.ToLower().TrimStart().TrimEnd()).FirstOrDefault();
-                            if (checkGroupName != null)
+                            TblCategoryGroup checkTblCategoryGroup = db.TblCategoryGroup.Where(v => v.CategoryCode == cateCode1 && v.IsDelete == false).FirstOrDefault();
+                            if(checkTblCategoryGroup !=null)
                             {
                                 objCategory = new { code = 0, CategoryCode = "" };
                             }
@@ -186,91 +203,132 @@ namespace AttributesManagement.DataAccess
                             {
                                 using (var ts = new TransactionScope())
                                 {
-                                    checkCateGroup.CategoryCode = (cateCode != "") ? Regex1(cateCode, CategoryConstant.regex, CategoryConstant.Space) : "";
+                                    checkCateGroup.CategoryCode = cateCode1;
                                     checkCateGroup.CategoryGroupName = tblCategory.CategoryName;
                                     checkCateGroup.CategoryTypeCode = tblCategory.CategoryTypeCode;
                                     checkCateGroup.CategoryDescription = tblCategory.CategoryDescription;
                                     checkCateGroup.UpdateBy = tblCategory.UpdateBy;
                                     checkCateGroup.UpdateDate = DateTime.Now;
+                                    checkCateGroup.IsDelete = false;
                                     db.Entry(checkCateGroup).State = EntityState.Modified;
                                     code = db.SaveChanges();
-                                    if (tblCategory.children != null)
+                                    if (tblCategory.children.Count > 0)
                                     {
                                         AddCategoryChild(checkCateGroup.CategoryCode, tblCategory.children);
                                     }
-                                    if (tblCategory.deleteCategory != null)
+                                    if (tblCategory.deleteCategory.Count > 0)
                                     {
                                         DeleteCategoryChild(tblCategory.deleteCategory);
                                     }
                                     objCategory = new { code = code, CategoryCode = checkCateGroup.CategoryCode };
                                     ts.Complete();
                                 }
-                                
                             }
+                        }
+                    }
+                    else 
+                    {
+
+                        TblCategory checkCateCode1 = db.TblCategory.Where(v => v.CategoryCode == tblCategory.CategoryCode && v.IsDelete == false).FirstOrDefault();
+                        using (var ts = new TransactionScope())
+                        {
+                            TblCategoryGroup addCategory = new TblCategoryGroup();
+                            addCategory.CategoryCode = cateCode1;
+                            addCategory.CategoryGroupName = tblCategory.CategoryName;
+                            addCategory.CategoryTypeCode = tblCategory.CategoryTypeCode;
+                            addCategory.CategoryDescription = tblCategory.CategoryDescription;
+                            addCategory.CreateBy = tblCategory.CreateBy;
+                            addCategory.CreateDate = DateTime.Now;
+                            addCategory.IsDelete = false;
+                            db.TblCategoryGroup.Add(addCategory);
+                            code = db.SaveChanges();
+                            if (checkCateCode1 != null)
+                            {
+                                db.TblCategory.Remove(checkCateCode1);
+                                db.SaveChanges();
+                            }
+                            if (tblCategory.children.Count > 0)
+                            {
+                                AddCategoryChild(addCategory.CategoryCode, tblCategory.children);
+                            }
+                            if (tblCategory.deleteCategory.Count > 0)
+                            {
+                                DeleteCategoryChild(tblCategory.deleteCategory);
+                            }
+                            objCategory = new { code = code, CategoryCode = addCategory.CategoryCode };
+                            ts.Complete();
                         }
                     }
                 }
                 else
                 {
-                    TblCategory checkCategory = db.TblCategory.Where(v => v.CategoryCode == tblCategory.CategoryCode && v.IsDelete == false).FirstOrDefault();
-                    if (checkCategory != null)
+                    if (checkCateCode != null)
                     {
-                        if (checkCategory.CategoryName.ToLower().TrimStart().TrimEnd() == tblCategory.CategoryName.ToLower().TrimStart().TrimEnd())
+                        TblCategory checkCateCode_New = db.TblCategory.Where(v => v.CategoryCode == tblCategory.CategoryCode && v.CategoryName.ToLower().TrimStart().TrimEnd() == tblCategory.CategoryName.ToLower().TrimStart().TrimEnd() && v.IsDelete == false).FirstOrDefault();
+                        if (checkCateCode_New != null)
                         {
                             using (var ts = new TransactionScope())
                             {
-                                checkCategory.CategoryCode = tblCategory.CategoryCode;
-                                checkCategory.CategoryTypeCode = tblCategory.CategoryTypeCode;
-                                checkCategory.CategoryName = tblCategory.CategoryName;
-                                checkCategory.CategoryDescription = tblCategory.CategoryDescription;
-                                checkCategory.IsDelete = false;
-                                checkCategory.UpdateBy = tblCategory.UpdateBy;
-                                checkCategory.UpdateDate = DateTime.Now;
-                                db.Entry(checkCategory).State = EntityState.Modified;
+                                checkCateCode.CategoryCode = cateCode1;
+                                checkCateCode.CategoryName = tblCategory.CategoryName;
+                                checkCateCode.CategoryTypeCode = tblCategory.CategoryTypeCode;
+                                checkCateCode.CategoryDescription = tblCategory.CategoryDescription;
+                                checkCateCode.CreateBy = tblCategory.CreateBy;
+                                checkCateCode.UpdateDate = DateTime.Now;
+                                checkCateCode.UpdateBy = tblCategory.UpdateBy;
+                                checkCateCode.IsDelete = false;
+                                db.Entry(checkCateCode).State = EntityState.Modified;
                                 code = db.SaveChanges();
-                                if (tblCategory.children != null)
+                                if (tblCategory.children.Count > 0)
                                 {
-                                    AddCategoryChild(checkCategory.CategoryCode, tblCategory.children);
+                                    AddCategoryChild(checkCateCode.CategoryCode, tblCategory.children);
                                 }
-                                if (tblCategory.deleteCategory != null)
+                                if (tblCategory.deleteCategory.Count > 0)
                                 {
                                     DeleteCategoryChild(tblCategory.deleteCategory);
                                 }
-                                objCategory = new { code = code, CategoryCode = checkCategory.CategoryCode };
+                                objCategory = new { code = code, CategoryCode = checkCateCode.CategoryCode };
                                 ts.Complete();
                             }
                         }
                         else
                         {
-                            TblCategory checkCategoryName = db.TblCategory.Where(v => v.CategoryName.ToLower().TrimStart().TrimEnd() == tblCategory.CategoryName.ToLower().TrimStart().TrimEnd() && v.IsDelete == false).FirstOrDefault();
-                            if (checkCategory == null)
+                            TblCategory checkCategory = db.TblCategory.Where(v => v.CategoryCode == cateCode1 && v.IsDelete == false).FirstOrDefault();
+                            if (checkCategory != null)
                             {
-                                using (var ts = new TransactionScope())
-                                {
-                                    checkCategory.CategoryCode = tblCategory.CategoryCode;
-                                    checkCategory.CategoryTypeCode = tblCategory.CategoryTypeCode;
-                                    checkCategory.CategoryName = tblCategory.CategoryName;
-                                    checkCategory.CategoryDescription = tblCategory.CategoryDescription;
-                                    checkCategory.IsDelete = false;
-                                    checkCategory.UpdateBy = tblCategory.UpdateBy;
-                                    checkCategory.UpdateDate = DateTime.Now;
-                                    db.Entry(checkCategory).State = EntityState.Modified;
-                                    code = db.SaveChanges();
-                                    if (tblCategory.children != null)
-                                    {
-                                        AddCategoryChild(checkCategory.CategoryCode, tblCategory.children);
-                                    }
-                                    if (tblCategory.deleteCategory != null)
-                                    {
-                                        DeleteCategoryChild(tblCategory.deleteCategory);
-                                    }
-                                    objCategory = new { code = code, CategoryCode = checkCategory.CategoryCode };
-                                    ts.Complete();
-                                }
+                                objCategory = new { code = 0, CategoryCode = "" };
                             }
                             else
                             {
-                                objCategory = new { code = 0, CategoryCode = "" };
+                                TblCategoryGroup removeCategoryGroup = db.TblCategoryGroup.Where(v => v.CategoryCode == cateCode1 && v.IsDelete == false).FirstOrDefault();
+                                using (var ts = new TransactionScope())
+                                {
+                                    TblCategory addCate = new TblCategory();
+                                    addCate.CategoryCode = cateCode1;
+                                    addCate.CategoryTypeCode = tblCategory.CategoryTypeCode;
+                                    addCate.CategoryName = tblCategory.CategoryName;
+                                    addCate.CategoryDescription = tblCategory.CategoryDescription;
+                                    addCate.IsDelete = false;
+                                    addCate.CreateBy = tblCategory.UpdateBy;
+                                    addCate.CreateDate = DateTime.Now;
+                                    db.TblCategory.Add(addCate);
+                                    code = db.SaveChanges();
+                                    if (removeCategoryGroup != null)
+                                    {
+                                        db.TblCategoryGroup.Remove(removeCategoryGroup);
+                                        db.SaveChanges();
+                                    }
+                                    if (tblCategory.children.Count > 0)
+                                    {
+                                        AddCategoryChild(addCate.CategoryCode, tblCategory.children);
+                                    }
+                                    if (tblCategory.deleteCategory.Count > 0)
+                                    {
+                                        DeleteCategoryChild(tblCategory.deleteCategory);
+                                    }
+                                    objCategory = new { code = code, CategoryCode = addCate.CategoryCode };
+                                    ts.Complete();
+                                }
                             }
                         }
                     }
@@ -293,75 +351,100 @@ namespace AttributesManagement.DataAccess
         {
             try
             {
-                int num = 0;
+                object objCategory = new object();
+                //var lstCate = db.TblCategory.Where(x =>x.CategoryTypeCode == categoryParentCode && lstCategoryChild.Where(c => c.CategoryCode == x.CategoryCode && c.ExtContent == x.ExtContent).Select(c => c.CategoryCode).Contains(x.CategoryCode)).ToList();
                 List<TblCategory> lstUpdatecategory = new List<TblCategory>();
                 List<TblCategory> lstAddcategory = new List<TblCategory>();
                 foreach (TblCategory item in lstCategoryChild)
                 {
-                    TblCategory addcategoryChild = new TblCategory();
-                    TblCategory checkCateCode = db.TblCategory.Where(v => v.IsDelete == false && v.CategoryCode == item.CategoryCode).FirstOrDefault();
-                    if(checkCateCode !=null)
+                    int num;
+                    string cateCode = LocDau(item.CategoryName).ToUpper();
+                    string cateCode1 = (cateCode != "") ? Regex1(cateCode, CategoryConstant.regex, CategoryConstant.Space) : "";
+                    TblCategory checkCateCode = db.TblCategory.Where(v => v.IsDelete == false && v.CategoryCode == item.CategoryCode && v.CategoryTypeCode == categoryParentCode).FirstOrDefault();
+                    TblCategory CheckchildCateCode = db.TblCategory.Where(v => v.CategoryTypeCode == categoryParentCode && v.IsDelete == false).LastOrDefault();
+                    string cateCode2 = (CheckchildCateCode != null) ? CheckchildCateCode.CategoryCode.Split("-").FirstOrDefault() : "";
+                    if (checkCateCode != null)
                     {
-                        if(checkCateCode.CategoryName.ToLower().TrimStart().TrimEnd() == item.CategoryName.ToLower().TrimStart().TrimEnd())
+                        TblCategory checkCategoryChild= db.TblCategory.Where(v => v.IsDelete == false && v.CategoryCode == item.CategoryCode && v.CategoryName.ToLower().TrimStart().TrimEnd() == item.CategoryName.ToLower().TrimStart().TrimEnd() && v.CategoryTypeCode == categoryParentCode).FirstOrDefault();
+                        if (checkCategoryChild != null)
                         {
-                            checkCateCode.CategoryCode = item.CategoryCode;
-                            checkCateCode.CategoryName = item.CategoryName;
-                            checkCateCode.CategoryTypeCode = categoryParentCode;
-                            checkCateCode.CategoryDescription = item.CategoryDescription;
-                            checkCateCode.ExtContent = (item.CategoryTypeCode != "") ? item.CategoryTypeCode : "";
-                            checkCateCode.IsDelete = false;
-                            checkCateCode.UpdateBy = item.UpdateBy;
-                            checkCateCode.UpdateDate = DateTime.Now;
+                            checkCategoryChild.CategoryCode = item.CategoryCode;
+                            checkCategoryChild.CategoryName = item.CategoryName;
+                            checkCategoryChild.CategoryTypeCode = categoryParentCode;
+                            checkCategoryChild.CategoryDescription = item.CategoryDescription;
+                            checkCategoryChild.ExtContent = (item.CategoryTypeCode != "") ? item.CategoryTypeCode : "";
+                            checkCategoryChild.IsDelete = false;
+                            checkCategoryChild.UpdateBy = item.UpdateBy;
+                            checkCategoryChild.UpdateDate = DateTime.Now;
                             db.Entry(checkCateCode).State = EntityState.Modified;
                             db.SaveChanges();
                         }
                         else
                         {
-                            TblCategory checkCategoryName = db.TblCategory.Where(v => v.IsDelete == false && v.CategoryName.ToLower().TrimStart().TrimEnd() == item.CategoryName.ToLower().TrimStart().TrimEnd()).FirstOrDefault();
-                            if(checkCategoryName ==null)
+                            TblCategory checkCategoryName = db.TblCategory.Where(v => v.IsDelete == false && v.CategoryCode == cateCode1 && v.CategoryTypeCode == categoryParentCode).FirstOrDefault();
+                            TblCategory checkCateCode1 = db.TblCategory.Where(v => v.IsDelete == false && v.CategoryCode == item.CategoryCode && v.CategoryTypeCode == categoryParentCode).FirstOrDefault();
+                            if (CheckchildCateCode != null)
                             {
-                                checkCateCode.CategoryCode = item.CategoryCode;
-                                checkCateCode.CategoryName = item.CategoryName;
-                                checkCateCode.CategoryTypeCode = categoryParentCode;
-                                checkCateCode.CategoryDescription = item.CategoryDescription;
-                                checkCateCode.ExtContent = (item.CategoryTypeCode != "") ? item.CategoryTypeCode : "";
-                                checkCateCode.IsDelete = false;
-                                checkCateCode.UpdateBy = item.UpdateBy;
-                                checkCateCode.UpdateDate = DateTime.Now;
-                                db.Entry(checkCateCode).State = EntityState.Modified;
+                                var index = (CheckchildCateCode.CategoryCode.Contains("-")) ? CheckchildCateCode.CategoryCode.Split("-").LastOrDefault() : "";
+                                if(index != "")
+                                {
+                                    num = int.Parse(index) + 1;
+                                }
+                                else
+                                {
+                                    num = 1;
+                                }
+                            }
+                            else
+                            {
+                                num = 1;
+                            }
+                            if (checkCategoryName == null)
+                            {
+                                checkCateCode1.CategoryCode =cateCode1 + "-" + num ;
+                                checkCateCode1.CategoryName = item.CategoryName;
+                                checkCateCode1.CategoryTypeCode = categoryParentCode;
+                                checkCateCode1.CategoryDescription = item.CategoryDescription;
+                                checkCateCode1.ExtContent = (item.CategoryTypeCode != "") ? item.CategoryTypeCode : "";
+                                checkCateCode1.IsDelete = false;
+                                checkCateCode1.UpdateBy = item.UpdateBy;
+                                checkCateCode1.UpdateDate = DateTime.Now;
+                                db.Entry(checkCateCode1).State = EntityState.Modified;
                                 db.SaveChanges();
                             }
                         }
                     }
                     else
                     {
-                        TblCategory CheckchildCateCode = new TblCategory();
-                        string cateCode = LocDau(item.CategoryName).ToUpper();
-                        string cateCode1= (cateCode != "") ? Regex1(cateCode, CategoryConstant.regex, CategoryConstant.Space) : "";
-                        CheckchildCateCode = db.TblCategory.Where(v => v.CategoryCode == cateCode1 && v.IsDelete == false).LastOrDefault();
-                        if(CheckchildCateCode != null)
+                        TblCategory addCategory = new TblCategory();
+                        if (CheckchildCateCode != null)
                         {
-                            
-                            num = 1;
-                            addcategoryChild.CategoryCode = cateCode1 + num;
+                            var index = (CheckchildCateCode.CategoryCode.Contains("-")) ? CheckchildCateCode.CategoryCode.Split("-").LastOrDefault() : "";
+                            if(index != "")
+                            {
+                                num = int.Parse(index) + 1;
+                            }
+                            else
+                            {
+                                num = 1;
+                            }
                         }
                         else
                         {
-                            addcategoryChild.CategoryCode = cateCode1;
+                            num = 1;
                         }
-                        addcategoryChild.CategoryTypeCode = categoryParentCode;
-                        addcategoryChild.CategoryName = item.CategoryName;
-                        addcategoryChild.CategoryDescription = item.CategoryDescription;
-                        addcategoryChild.ExtContent = (item.CategoryTypeCode != "") ? item.CategoryTypeCode : "";
-                        addcategoryChild.IsDelete = false;
-                        addcategoryChild.CreateBy = item.CreateBy;
-                        addcategoryChild.CreateDate = DateTime.Now;
-                        lstAddcategory.Add(addcategoryChild);
+                        addCategory.CategoryCode = cateCode1 + "-" + num;
+                        addCategory.CategoryTypeCode = categoryParentCode;
+                        addCategory.CategoryName = item.CategoryName;
+                        addCategory.CategoryDescription = item.CategoryDescription;
+                        addCategory.ExtContent = (item.CategoryTypeCode != "") ? item.CategoryTypeCode : "";
+                        addCategory.IsDelete = false;
+                        addCategory.CreateBy = item.CreateBy;
+                        addCategory.CreateDate = DateTime.Now;
+                        db.TblCategory.Add(addCategory);
+                        db.SaveChanges();
                     }
                 }
-                db.TblCategory.AddRange(lstAddcategory);
-                db.SaveChanges();
-
             }
             catch(Exception ex)
             {
@@ -384,8 +467,12 @@ namespace AttributesManagement.DataAccess
                 if (categoryCode != "")
                 {
                     List<TblAttributeConstraint> checkUsing = db.TblAttributeConstraint.Where(v =>v.IsDelete == false && (v.ContraintsType == categoryCode || v.LinkContraints == categoryCode)).ToList();
-                    List<TblVocattributes> checkDataUsing = db.TblVocattributes.Where(v =>v.IsDelete == false && (v.DataType == categoryCode || v.AttributeType == categoryCode || v.CategoryParentCode == categoryCode)).ToList();
-                    if (checkDataUsing.Count > 0 || checkUsing.Count > 0)
+                    List<TblAttributes> checkDataUsing = db.TblAttributes.Where(v =>v.IsDelete == false && (v.DataType == categoryCode || v.AttributeType == categoryCode || v.CategoryParentCode == categoryCode || v.DefaultValue == categoryCode)).ToList();
+                    if (checkDataUsing.Count > 0  )
+                    {
+                        deleteCateCode = new { code = 0, CategoryCode = "" };
+                    }
+                    else if(checkUsing.Count > 0)
                     {
                         deleteCateCode = new { code = 0, CategoryCode = "" };
                     }
@@ -477,7 +564,7 @@ namespace AttributesManagement.DataAccess
         {
             object objCateCode = new object();
             List<TblAttributeConstraint> checkUsing = db.TblAttributeConstraint.Where(v =>( v.ContraintsType == categoryCode || v.LinkContraints == categoryCode) && v.IsDelete == false).ToList();
-            List<TblVocattributes> checkDataUsing = db.TblVocattributes.Where(v => (v.DataType == categoryCode || v.AttributeType == categoryCode || v.CategoryParentCode == categoryCode) && v.IsDelete == false).ToList();
+            List<TblAttributes> checkDataUsing = db.TblAttributes.Where(v => (v.DataType == categoryCode || v.AttributeType == categoryCode || v.CategoryParentCode == categoryCode) && v.IsDelete == false).ToList();
             if(checkDataUsing.Count >0 || checkUsing.Count >0)
             {
                 objCateCode = new { code = 0, CategoryCode = "" };
@@ -602,16 +689,9 @@ namespace AttributesManagement.DataAccess
         {
             try
             {
-                var objcategory = from a in db.TblCategory
-                                  where a.IsDelete == false && a.CategoryTypeCode == categoryCode
-                                  select new
-                                  {
-                                      a.CategoryCode,
-                                      a.CategoryTypeCode,
-                                      a.CategoryName,
-                                      a.ExtContent
-                                  };
-                return objcategory;
+                List<List<dynamic>> obj = sp.GetAllChildCategory(categoryCode);
+                var response = obj[0];
+                return response;
             }
             catch(Exception ex)
             {
@@ -644,6 +724,14 @@ namespace AttributesManagement.DataAccess
                 return new { code = 500, messsage = ex.Message };
             }
         }
+        /// <summary>
+        /// Read file and Import File 
+        /// CreatedBy: Cuongpv1
+        /// CreatedDate: 23/05/2019
+        /// </summary>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        /// 
         public void LoadContext(string orgCode, IDistributedCache distributedCache)
         {
             if (db == null || strconnect != orgCode)

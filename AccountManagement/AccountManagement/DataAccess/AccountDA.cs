@@ -62,7 +62,8 @@ namespace AccountManagement.DataAccess
         /// <returns></returns>
         public string GetStringCache(string cacheKey)
         {
-            return _distributedCache.GetString(cacheKey);
+            string value = _distributedCache.GetString(cacheKey);
+            return value;
         }
 
         public async Task<string> GetStringAsync(string key)
@@ -108,9 +109,9 @@ namespace AccountManagement.DataAccess
                     var authorityType = from a in db.TblAuthority
                                         where (from c in db.TblAuthorityUser
                                                where c.UserId == user.Id
-                 && a.IsDelete == true
-                 && a.IsLock == false
-                 && a.AuthorityType == AccountConstant.Admin
+                                                     && a.IsDelete == true
+                                                     && a.IsLock == false
+                                                     && a.AuthorityType == AccountConstant.Admin
                                                select c.AuthorityId).Contains(a.AuthorityId)
                                         select a;
                     List<TblAuthority> lstauT = authorityType.ToList();
@@ -123,8 +124,7 @@ namespace AccountManagement.DataAccess
                             {
                                 DateTime checkDate = user.ExpirationDate ?? DateTime.MinValue;
                                 DateTime now = DateTime.Now;
-                                DateTime dbTime = checkDate;
-                                if (now > dbTime && !user.EmailConfirmed.Value)
+                                if (now > checkDate && !user.EmailConfirmed.Value)
                                 {
                                     using (var ts = new TransactionScope())
                                     {
@@ -178,6 +178,8 @@ namespace AccountManagement.DataAccess
         public TblUsers GetUsersLogin(string userName, string pw)
         {
             bool checkSuperAdmin = false;
+            int id = 0;
+            string authorityName = "";
             try
             {
                 TblUsers user = db.TblUsers.Where(a => a.UserName.Replace(" ", string.Empty).ToLower() == userName && a.IsDelete == false).FirstOrDefault();
@@ -188,8 +190,12 @@ namespace AccountManagement.DataAccess
                     TblUsers userFind = db.TblUsers.Where(a => a.IsDelete == false && a.UserName.ToLower() == userName.ToLower() && accountCommon.ValidatePassword(pw, a.Password)).FirstOrDefault();
                     if (userFind == null)
                     {
-                        int authorityId = db.TblAuthorityUser.Where(x => x.UserId == user.Id).FirstOrDefault().AuthorityId.Value;
-                        string authorityName = db.TblAuthority.Where(x => x.AuthorityId == authorityId).FirstOrDefault().AuthorityName;
+                        var authorityId = db.TblAuthorityUser.Where(x => x.UserId == user.Id).FirstOrDefault();
+                        if(authorityId != null)
+                        {
+                            id = authorityId.AuthorityId.Value;
+                            authorityName = db.TblAuthority.Where(x => x.AuthorityId == id).FirstOrDefault().AuthorityName;
+                        }
                         if (authorityName.Equals(AccountConstant.SuperAdmin))
                         {
                             checkSuperAdmin = true;
@@ -225,13 +231,16 @@ namespace AccountManagement.DataAccess
         }
 
         /// <summary>
-        /// Function Get User by Username
+        /// Function Get User by Username_ 
+        /// Mặc định các giá trị sẽ hiển thị ở dạng rõ kể cả có cấu hình mã hóa hay không
         /// CreatedBy: System
         /// </summary>
         /// <param name="userName"></param>
         /// <returns></returns>
-        public TblUsers GetUsersCustom(string userName, string orgCode)
+        public TblUsers GetUsersCustom(string userName, string orgCode, int userIdLogin)
         {
+            string keyEncrypt = "";
+            TblCategory category = new TblCategory();
             try
             {
                 TblUsers result = new TblUsers();
@@ -239,23 +248,60 @@ namespace AccountManagement.DataAccess
                     && a.UserName == userName).FirstOrDefault();
                 TblOrganization org = GetOrganizationId(tblUsers.Id);
                 tblUsers.CategoryCodeRole = org.OrganizationName;
-                TblOrganization department = db.TblOrganization.Where(o => o.IsDelete == false && o.OrganizationCode != null && o.OrganizationCode == tblUsers.CategoryCodeDepartment).FirstOrDefault();
-                if (department != null)
-                {
-                    tblUsers.CategoryCodeDepartment = department.OrganizationName;
-                }
+                //TblOrganization department = db.TblOrganization.Where(o => o.IsDelete == false && o.OrganizationCode != null && o.OrganizationCode == tblUsers.CategoryCodeDepartment).FirstOrDefault();
+                //if (department != null)
+                //{
+                //    tblUsers.CategoryCodeDepartment = department.OrganizationName;
+                //}
                 //Position
-                TblCategory category = db.TblCategory.Where(c => c.CategoryCode == tblUsers.Position && c.IsDelete == false).FirstOrDefault();
-                if (category != null)
+                if (!string.IsNullOrEmpty(tblUsers.Position))
                 {
-                    tblUsers.Position = category.CategoryName;
+                    category = GetAllCategory(AccountConstant.Position, orgCode, tblUsers.Position).FirstOrDefault();
+                    if (category != null)
+                    {
+                        tblUsers.Position = category.CategoryName;
+                    }
+                }
+
+                //Phòng ban
+                if (!string.IsNullOrEmpty(tblUsers.CategoryCodeDepartment))
+                {
+                    category = GetAllCategory(AccountConstant.Department, orgCode, tblUsers.CategoryCodeDepartment).FirstOrDefault();
+                    if (category != null)
+                    {
+                        tblUsers.CategoryCodeDepartment = category.CategoryName;
+                    }
                 }
                 if (tblUsers != null)
                 {
                     result = new TblUsers();
                     result.Id = tblUsers.Id;
                     result.UserName = tblUsers.UserName;
-                    result.FullName = tblUsers.FullName;
+                    TblOrganization organization = GetOrganizationId(userIdLogin);
+                    if (organization != null)
+                    {
+                        // Lấy khóa để giả mã cho các đơn vị
+                        keyEncrypt = accountCommon.GenerateEncryptionKey(organization.OrganizationCode);
+                    }
+                    if (ListFieldEncrypted(AccountConstant.FieldEncryptedFullName,
+                                AccountConstant.MENU_ADMIN_USER, userIdLogin) != null)
+                    {
+                        result.FullName = accountCommon.DecryptStringAES(tblUsers.FullName, keyEncrypt);
+                    }
+                    else
+                    {
+                        result.FullName = tblUsers.FullName;
+                    }
+                    if (ListFieldEncrypted(AccountConstant.FieldEncryptedAddress,
+                               AccountConstant.MENU_ADMIN_USER, userIdLogin) != null)
+                    {
+                        result.Address = accountCommon.DecryptStringAES(tblUsers.Address, keyEncrypt);
+                    }
+                    else
+                    {
+                        result.Address = tblUsers.Address;
+                    }
+
                     result.Email = tblUsers.Email;
                     result.PhoneNumber = tblUsers.PhoneNumber;
                     result.CreateBy = tblUsers.CreateBy;
@@ -283,8 +329,7 @@ namespace AccountManagement.DataAccess
                     {
                         result.Avatar = tblUsers.Avatar;
                     }
-                    
-                    result.Address = tblUsers.Address;
+
                     result.LastLogin = tblUsers.LastLogin;
                     result.Position = tblUsers.Position == "0" ? null : tblUsers.Position; ;
                     result.Gender = tblUsers.Gender;
@@ -327,7 +372,6 @@ namespace AccountManagement.DataAccess
 
         }
 
-
         /// <summary>
         /// Tạo mới thông tin thành viên
         /// CreatedBy: HaiHM
@@ -335,7 +379,7 @@ namespace AccountManagement.DataAccess
         /// </summary>
         /// <param name="model">object</param>
         /// <returns></returns>
-        public int AddUser(UserAndOrgViewModel model)
+        public int AddUser(UserAndOrgViewModel model, int userIdLogin)
         {
             int save = 0;
             string pass = "";
@@ -343,6 +387,7 @@ namespace AccountManagement.DataAccess
             string phoneNumber = "";
             string fullname = "";
             string username = "";
+            string address = "";
 
             if (!string.IsNullOrEmpty(model.tblUsers.UserName))
             {
@@ -358,7 +403,11 @@ namespace AccountManagement.DataAccess
             }
             if (!string.IsNullOrEmpty(model.tblUsers.FullName))
             {
-                fullname = model.tblUsers.FullName.TrimEnd().TrimStart();
+                fullname = model.tblUsers.FullName.Trim();
+            }
+            if (!string.IsNullOrEmpty(model.tblUsers.Address))
+            {
+                address = model.tblUsers.Address.Trim();
             }
             try
             {
@@ -384,6 +433,23 @@ namespace AccountManagement.DataAccess
                     if (userChk == null)
                     {
                         TblUsers tblUsers = new TblUsers();
+
+                        // Mã hóa luôn nếu trong db đã cấu hình mã hóa
+                        //TblOrganization organization = GetOrganizationId(userIdLogin);
+                        //if (organization != null)
+                        //{
+                        //    // Lấy khóa để giả mã cho các đơn vị
+                        //    keyEncrypt = accountCommon.GenerateEncryptionKey(organization.OrganizationCode);
+                        //}
+                        //if (ListFieldEncrypted(AccountConstant.FieldEncryptedFullName, AccountConstant.MENU_ADMIN_USER, userIdLogin) != null)
+                        //{
+                        //    userChk.FullName = accountCommon.EncryptStringAES(fullname, keyEncrypt);
+                        //}
+                        //if (ListFieldEncrypted(AccountConstant.FieldEncryptedAddress, AccountConstant.MENU_ADMIN_USER, userIdLogin) != null)
+                        //{
+                        //    userChk.Address = accountCommon.EncryptStringAES(address, keyEncrypt);
+                        //}
+
                         pass = accountCommon.CreateRandomPassword();
                         string passHash = accountCommon.HashPassword(pass);
                         tblUsers.UserName = username;
@@ -396,9 +462,16 @@ namespace AccountManagement.DataAccess
                         tblUsers.UpdateBy = model.tblUsers.UpdateBy;
                         tblUsers.UpdateDate = DateTime.Now;
                         tblUsers.IsDelete = false;
-                        tblUsers.IsLock = model.tblUsers.IsLock;
+                        if (model.tblUsers.IsLock.HasValue)
+                        {
+                            tblUsers.IsLock = model.tblUsers.IsLock;
+                        }
+                        else
+                        {
+                            tblUsers.IsLock = false;
+                        }
                         tblUsers.Avatar = model.tblUsers.Avatar;
-                        tblUsers.Address = model.tblUsers.Address;
+                        tblUsers.Address = address;
                         tblUsers.LastLogin = null;
                         tblUsers.Position = model.tblUsers.Position;
                         tblUsers.EmailConfirmed = false;
@@ -407,11 +480,11 @@ namespace AccountManagement.DataAccess
                         // Ex: 21232f297a57a5a743894a0e4a801fc3=
                         tblUsers.HistoryPassword = passHash + AccountConstant.PasswordPolicySplit;
                         // + 30 days
-                        tblUsers.ExpirationDate = DateTime.Now.AddDays(Int32.Parse(_config[AccountConstant.PasswordPolicyExpDateCreated])); 
+                        tblUsers.ExpirationDate = DateTime.Now.AddDays(Int32.Parse(_config[AccountConstant.PasswordPolicyExpDateCreated]));
                         tblUsers.CategoryCodeDepartment = model.tblUsers.CategoryCodeDepartment;
                         tblUsers.CategoryCodeRole = model.tblUsers.CategoryCodeRole;
                         // when create user: SET Default avarta follow gender
-                        if(tblUsers.Gender == 1)
+                        if (tblUsers.Gender == 1)
                         {
                             tblUsers.Avatar = AccountConstant.LinkDefaulfLogoBoy;
                         }
@@ -584,12 +657,14 @@ namespace AccountManagement.DataAccess
         /// </summary>
         /// <param name="model">object</param>
         /// <returns></returns>
-        public int EditUser(UserAndOrgViewModel model)
+        public int EditUser(UserAndOrgViewModel model, int userIdLogin)
         {
             int edit = 0;
             string email = "";
             string phoneNumber = "";
             string fullname = "";
+            string address = "";
+            string keyEncrypt = "";
 
             if (!string.IsNullOrEmpty(model.tblUsers.Email))
             {
@@ -601,7 +676,11 @@ namespace AccountManagement.DataAccess
             }
             if (!string.IsNullOrEmpty(model.tblUsers.FullName))
             {
-                fullname = model.tblUsers.FullName.TrimEnd().TrimStart();
+                fullname = model.tblUsers.FullName.Trim();
+            }
+            if (!string.IsNullOrEmpty(model.tblUsers.Address))
+            {
+                address = model.tblUsers.FullName.Trim();
             }
             try
             {
@@ -626,17 +705,63 @@ namespace AccountManagement.DataAccess
                             return edit = AccountConstant.EditUserDuplicatePhoneNumber;
                         }
                     }
-                    using (var ts = new TransactionScope())
+                    TblOrganization organization = GetOrganizationId(userIdLogin);
+                    if (organization != null)
+                    {
+                        // Lấy khóa để giả mã cho các đơn vị
+                        keyEncrypt = accountCommon.GenerateEncryptionKey(organization.OrganizationCode);
+                    }
+                    //Nếu trường FullName không bị mã hóa thì sẽ lưu như bình thường
+                    List<EncryptionViewModel> lstCheckFullName = ListFieldEncrypted(AccountConstant.FieldEncryptedFullName,
+                            AccountConstant.MENU_ADMIN_USER, userIdLogin);
+                    //=> Lưu ở dạng rõ
+                    if (lstCheckFullName == null)
                     {
                         userChk.FullName = fullname;
+                    }
+                    // Có quyền xem mã hóa trường FullName trong database đang bị mã hóa
+                    //=> Lưu ở dạng mã hóa
+                    if (lstCheckFullName != null && CheckRoleDecrypt(userIdLogin,
+                                                                        AccountConstant.FieldEncryptedFullName,
+                                                                        AccountConstant.MENU_ADMIN_USER))
+                    {
+                        userChk.FullName = accountCommon.EncryptStringAES(fullname, keyEncrypt);
+                    }
+
+                    //Nếu trường Address không bị mã hóa thì sẽ lưu như bình thường
+                    //=> Lưu ở dạng rõ
+                    List<EncryptionViewModel> lstCheckAddress = ListFieldEncrypted(AccountConstant.FieldEncryptedAddress,
+                            AccountConstant.MENU_ADMIN_USER, userIdLogin);
+                    if (lstCheckAddress == null)
+                    {
+                        userChk.Address = model.tblUsers.Address;
+                    }
+                    // Có quyền xem mã hóa trường Address trong database đang bị mã hóa
+                    //=> Lưu ở dạng mã hóa
+                    if (lstCheckAddress != null && CheckRoleDecrypt(userIdLogin,
+                                                                        AccountConstant.FieldEncryptedAddress,
+                                                                        AccountConstant.MENU_ADMIN_USER))
+                    {
+                        userChk.Address = accountCommon.EncryptStringAES(fullname, keyEncrypt);
+                    }
+
+                    using (var ts = new TransactionScope())
+                    {
                         userChk.Email = email;
                         userChk.PhoneNumber = phoneNumber;
                         userChk.UpdateBy = model.tblUsers.UpdateBy;
                         userChk.UpdateDate = DateTime.Now;
                         //userChk.IsDelete = model.tblUsers.IsDelete;
-                        userChk.IsLock = model.tblUsers.IsLock;
+                        //userChk.IsLock = model.tblUsers.IsLock;
+                        if (model.tblUsers.IsLock.HasValue)
+                        {
+                            userChk.IsLock = model.tblUsers.IsLock;
+                        }
+                        else
+                        {
+                            userChk.IsLock = false;
+                        }
                         userChk.Avatar = model.tblUsers.Avatar;
-                        userChk.Address = model.tblUsers.Address;
                         //userChk.LastLogin = model.tblUsers.LastLogin;
                         userChk.Position = model.tblUsers.Position;
                         //userChk.EmailConfirmed = model.tblUsers.EmailConfirmed;
@@ -676,7 +801,7 @@ namespace AccountManagement.DataAccess
                         else
                         {
                             List<TblAuthorityUser> deleteAU = db.TblAuthorityUser.Where(au => au.UserId == userChk.Id).ToList<TblAuthorityUser>();
-                            if(deleteAU != null)
+                            if (deleteAU != null)
                             {
                                 foreach (var item in deleteAU)
                                 {
@@ -737,13 +862,15 @@ namespace AccountManagement.DataAccess
         /// </summary>
         /// <param name="userID">id of user</param>
         /// <returns></returns>
-        public int DeleteUser(int userID)
+        public int DeleteUser(int userID, string username)
         {
             try
             {
                 TblUsers userChk = db.TblUsers.Where(u => u.IsDelete == false && u.Id == userID).FirstOrDefault();
                 if (userChk != null)
                 {
+                    userChk.UpdateBy = username;
+                    userChk.UpdateDate = DateTime.Now;
                     userChk.IsDelete = true; // change status here
                     db.Entry(userChk).State = EntityState.Modified;
                     db.SaveChanges();
@@ -809,6 +936,8 @@ namespace AccountManagement.DataAccess
         /// Function Reset password user
         /// CreatedBy: HaiHM
         /// CreatedDate: 18/04/2019
+        /// ModifiedDate: 10-06-2019
+        /// ModifiedBody: Rút gọn link reset
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
@@ -822,10 +951,41 @@ namespace AccountManagement.DataAccess
 
                 if (userChk != null)
                 {
+                    // Active admin
+                    var authorityType = from a in db.TblAuthority
+                                        where (from c in db.TblAuthorityUser
+                                               where c.UserId == user.Id
+                                                     && a.IsDelete == true
+                                                     && a.AuthorityType == AccountConstant.Admin
+                                               select c.AuthorityId).Contains(a.AuthorityId)
+                                        select a;
+                    List<TblAuthority> lstauT = authorityType.ToList();
+                    if (lstauT.Count() > 0)
+                    {
+                        TblAuthority auT = lstauT.FirstOrDefault();
+                        if (auT.AuthorityType != null)
+                        {
+                            if (auT.AuthorityType == AccountConstant.Admin)
+                            {
+                                userChk.IsLock = false;
+                            }
+                        }
+                    }
+                    // Gen code reset
+                    string code = accountCommon.CreateRandomStringNotSpecial();
+                    userChk.CodeReset = accountCommon.HashPassword(user.UserName + code);
+                    userChk.DateUpdatePassword = DateTime.Now.AddDays(AccountConstant.AddDaysLinkReset);
+                    db.Entry(userChk).State = EntityState.Modified;
+                    db.SaveChanges();
                     // gentoken
-                    string token = GenerateJSONWebTokenReset(userChk);
+                    //string token = GenerateJSONWebTokenReset(userChk);
+                    string token = AccountConstant.username + AccountConstant.PasswordPolicySplit + user.UserName
+                                  + AccountConstant.And
+                                  + AccountConstant.codeReset + AccountConstant.PasswordPolicySplit + code;
+
+
                     // send mail
-                    SendMailReset(userChk.Email, userChk, AccountConstant.ApiLinkReset + "?token=" + token); // Chua co link
+                    SendMailReset(userChk.Email, userChk, AccountConstant.ApiLinkReset + token); // Chua co link
                     return AccountConstant.ResetPassSuccess;
                 }
                 else
@@ -839,6 +999,37 @@ namespace AccountManagement.DataAccess
                 return AccountConstant.ResetPassFail;
             }
 
+        }
+
+        /// <summary>
+        /// Function Check Token Reset
+        /// CreateBy: HaiHM
+        /// CreatedDate: 20/04/2019
+        /// ModifiedDate: 10/6/2019
+        /// ModifiedBody: Rút gọn link reset
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public bool CheckTokenReset(string username, string codeReset)
+        {
+            try
+            {
+                TblUsers userCheck = GetUsers(username);
+
+                if (userCheck != null && !string.IsNullOrEmpty(userCheck.CodeReset))
+                {
+                    if (accountCommon.ValidatePassword(username + codeReset, userCheck.CodeReset) && userCheck.DateUpdatePassword >= DateTime.Now)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
 
         /// <summary>
@@ -910,16 +1101,63 @@ namespace AccountManagement.DataAccess
         /// </summary>
         /// <param strFilter="object filter"></param>
         /// <returns></returns>
-        public async Task<object> SearchUser(string strFilter)
+        public async Task<object> SearchUser(int userId, string strFilter)
         {
+            bool checkRole = false;
+            string keyEncrypt = "";
+            List<EncryptionViewModel> lstField = ListFieldEncrypted(AccountConstant.FieldMenuAdminUser, AccountConstant.MENU_ADMIN_USER, userId);
             try
             {
                 List<List<dynamic>> obj = sp.SearchUser(strFilter);
                 List<TblUserViewModel> lstUser = obj[0].OfType<TblUserViewModel>().ToList();
                 if (lstUser != null)
                 {
+                    // kiểm tra xem có được hiển thị dữ liệu mã hóa hay không và có trường nào mã hóa nữa hay không
+                    checkRole = CheckRoleDecrypt(userId, AccountConstant.FieldMenuAdminUser, AccountConstant.MENU_ADMIN_USER);
                     foreach (var item in lstUser)
                     {
+                        //Nếu có được hiển thị dữ liệu mã hóa
+                        if (checkRole)
+                        {
+                            // Không bị disable các trường mã hóa
+                            lstField = null;
+                            TblOrganization organization = GetOrganizationId(userId);
+                            if (organization != null)
+                            {
+                                // Lấy khóa để giả mã cho các đơn vị
+                                keyEncrypt = accountCommon.GenerateEncryptionKey(organization.OrganizationCode);
+                            }
+                            // duyệt từng field trong bảng mã hóa
+                            foreach (var fieldEncrypted in ListFieldEncrypted(AccountConstant.FieldMenuAdminUser, AccountConstant.MENU_ADMIN_USER, userId))
+                            {
+                                // kiểm tra xem field nào cần được giải mã, duyệt lần lượt "FullName","Address"
+                                switch (fieldEncrypted.Field)
+                                {
+                                    case AccountConstant.FieldEncryptedFullName:
+                                        //giải mã FullName ở đây
+                                        if (!string.IsNullOrEmpty(item.FullName))
+                                        {
+                                            if (item.CreateDate <= fieldEncrypted.UpdateDate)
+                                            {
+                                                item.FullName = accountCommon.DecryptStringAES(item.FullName, keyEncrypt);
+                                            }
+                                        }
+                                        break;
+                                    case AccountConstant.FieldEncryptedAddress:
+                                        // giải mã Address ở đây
+                                        if (!string.IsNullOrEmpty(item.Address))
+                                        {
+                                            if (item.CreateDate <= fieldEncrypted.UpdateDate)
+                                            {
+                                                item.Address = accountCommon.DecryptStringAES(item.Address, keyEncrypt);
+                                            }
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
                         var base64 = item.Avatar;
                         if (File.Exists(_environment.WebRootPath + item.Avatar))
                         {
@@ -927,8 +1165,19 @@ namespace AccountManagement.DataAccess
                         }
                         item.Avatar = base64;
                     }
+                    //foreach (var item in lstUser)
+                    //{
+                    //    // Có trường mã hóa và có quyền được giải mã
+
+                    //    var base64 = item.Avatar;
+                    //    if (File.Exists(_environment.WebRootPath + item.Avatar))
+                    //    {
+                    //        base64 = await ImageToBase64Async(item.Avatar);
+                    //    }
+                    //    item.Avatar = base64;
+                    //}
                 }
-                var response = new { data = lstUser, paging = obj[1] };
+                var response = new { data = lstUser, paging = obj[1], fieldEncypt = CustomFieldEncypted(lstField) };
                 return response;
             }
             catch (Exception ex)
@@ -938,25 +1187,90 @@ namespace AccountManagement.DataAccess
             }
         }
 
+        private object CustomFieldEncypted(List<EncryptionViewModel> lstEncrypt)
+        {
+            if(lstEncrypt != null)
+            {
+                FieldAccountEncyptViewModel fevm = new FieldAccountEncyptViewModel();
+                foreach (var item in lstEncrypt)
+                {
+                    if(item.Field == AccountConstant.FieldEncryptedFullName)
+                    {
+                        fevm.FullName = true;
+                    }
+                    if(item.Field == AccountConstant.FieldEncryptedAddress)
+                    {
+                        fevm.Address = true;
+                    }
+                }
+                return fevm;
+            }
+            else
+            {
+                FieldAccountEncyptViewModel fevm = new FieldAccountEncyptViewModel();
+                fevm.Address = false;
+                fevm.FullName = false;
+                return fevm;
+            }
+
+        }
+
         /// <summary>
-        /// chức năng lấy danh sách chức vụ theo CategoryTypeCode
+        /// chức năng lấy danh sách chức vụ theo CategoryTypeCode 
         /// CreatedBy: HaiHM
         /// CreatedDate: 23/04/2019
+        /// ModifiedDate: 14/6/2019
+        /// ModifiedBody: lấy danh sách danh mục theo từng đơn vị đăng nhập
         /// </summary>
         /// <param name="CategoryTypeCode">Type get</param>
         /// <returns></returns>
-        public object GetAllCategory(string CategoryTypeCode)
+        public List<TblCategory> GetAllCategory(string CategoryTypeCode, string orgCode, string CategoryCode)
         {
+            List<TblCategory> lstCategory = new List<TblCategory>();
+            List<TblCategory> lstCategoryByCategoryCode = new List<TblCategory>();
+            bool checkValue = true;
             try
             {
-                List<List<dynamic>> obj = sp.GetAllCategory(CategoryTypeCode);
-                var response = new { data = obj[0] };
-                return response;
+                if(CategoryTypeCode.ToLower() == AccountConstant.Business.ToLower())
+                {
+                    lstCategory = db.TblCategory.Where(c => c.CategoryTypeCode.ToLower() == AccountConstant.Business.ToLower() && c.IsDelete == false && c.IsActive == true).ToList();
+                    return lstCategory;
+                }
+                List<List<dynamic>> obj = sp.GetAllCategory(CategoryTypeCode, GetConnectionByOrgCode(orgCode));
+                if(obj != null)
+                {
+                    if(obj[0] != null)
+                    {
+                        if(obj[0].Count() > 0)
+                        {
+                            lstCategory = obj[0].OfType<TblCategory>().ToList();
+                            if (!string.IsNullOrEmpty(CategoryCode))
+                            {
+                                
+                                foreach (var item in lstCategory)
+                                {
+                                    if(item.CategoryCode == CategoryCode)
+                                    {
+                                        checkValue = false;
+                                        lstCategoryByCategoryCode.Add(item);
+                                        return lstCategoryByCategoryCode;
+                                    }
+                                }
+                                if (checkValue)
+                                {
+                                    return lstCategoryByCategoryCode;
+                                }
+                            }
+                        }
+                    }
+                }
+                //var response = new { data = obj[0] };
+                return lstCategory;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return new { code = 400, data = ex.Message };
+                return null;
             }
         }
 
@@ -1072,9 +1386,10 @@ namespace AccountManagement.DataAccess
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public int UpdateUser(TblUsers user, bool checkUpdateImage)
+        public int UpdateUser(TblUsers user, bool checkUpdateImage, bool updatePass, bool checkResetSuccess, int userIdLogin)
         {
             int update = 0;
+            string keyEncrypt = "";
             try
             {
                 TblUsers userChk = db.TblUsers.Where(a => a.IsDelete == false && a.UserName == user.UserName && user.Id == user.Id).FirstOrDefault();
@@ -1097,16 +1412,66 @@ namespace AccountManagement.DataAccess
                 }
                 if (userChk != null)
                 {
-                    userChk.FullName = user.FullName;
+                    //userChk.FullName = user.FullName;
+                    //userChk.Address = user.Address;
+                    TblOrganization organization = GetOrganizationId(user.Id);
+                    if (organization != null)
+                    {
+                        // Lấy khóa để giả mã cho các đơn vị
+                        keyEncrypt = accountCommon.GenerateEncryptionKey(organization.OrganizationCode);
+                    }
+                    //Nếu trường FullName không bị mã hóa thì sẽ lưu như bình thường
+                    List<EncryptionViewModel> lstCheckFullName = ListFieldEncrypted(AccountConstant.FieldEncryptedFullName,
+                            AccountConstant.MENU_ADMIN_USER, user.Id);
+                    //=> Lưu ở dạng rõ
+                    if (lstCheckFullName == null)
+                    {
+                        userChk.FullName = user.FullName;
+                    }
+                    // Có quyền xem mã hóa trường FullName trong database đang bị mã hóa
+                    //=> Lưu ở dạng mã hóa
+                    if (lstCheckFullName != null && CheckRoleDecrypt(user.Id,
+                                                                        AccountConstant.FieldEncryptedFullName,
+                                                                        AccountConstant.MENU_ADMIN_USER))
+                    {
+                        userChk.FullName = accountCommon.EncryptStringAES(user.FullName, keyEncrypt);
+                    }
+
+                    //Nếu trường Address không bị mã hóa thì sẽ lưu như bình thường
+                    //=> Lưu ở dạng rõ
+                    List<EncryptionViewModel> lstCheckAddress = ListFieldEncrypted(AccountConstant.FieldEncryptedAddress,
+                            AccountConstant.MENU_ADMIN_USER, user.Id);
+                    if (lstCheckAddress == null)
+                    {
+                        userChk.Address = user.Address;
+                    }
+                    // Có quyền xem mã hóa trường Address trong database đang bị mã hóa
+                    //=> Lưu ở dạng mã hóa
+                    if (lstCheckAddress != null && CheckRoleDecrypt(user.Id,
+                                                                        AccountConstant.FieldEncryptedAddress,
+                                                                        AccountConstant.MENU_ADMIN_USER))
+                    {
+                        userChk.Address = accountCommon.EncryptStringAES(user.Address, keyEncrypt);
+                    }
+
                     userChk.Email = user.Email;
                     userChk.PhoneNumber = user.PhoneNumber;
                     userChk.UpdateBy = user.UserName;
                     userChk.UpdateDate = DateTime.Now;
+                    if (updatePass)
+                    {
+                        userChk.Password = user.Password;
+                        userChk.EmailConfirmed = user.EmailConfirmed;
+                    }
+                    if (checkResetSuccess)
+                    {
+                        user.DateUpdatePassword = user.DateUpdatePassword;
+                        user.CodeReset = user.CodeReset;
+                    }
                     if (checkUpdateImage)
                     {
                         userChk.Avatar = user.Avatar;
                     }
-                    userChk.Address = user.Address;
                     userChk.BirthDay = user.BirthDay;
                     userChk.Gender = user.Gender;
 
@@ -1168,7 +1533,7 @@ namespace AccountManagement.DataAccess
         /// </summary>
         /// <param name="userInfo"></param>
         /// <returns></returns>
-        private string GenerateJSONWebTokenReset(TblUsers userInfo)
+        public string GenerateJSONWebTokenReset(TblUsers userInfo)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config[AccountConstant.JwtKey]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -1329,21 +1694,35 @@ namespace AccountManagement.DataAccess
         /// CreatedBy: HaiHM
         /// CreatedDate: 18/04/2019
         /// </summary>
+        /// <param name="switchData"> switchData = true => Dùng cho màn hình cấu hình module</param>
         /// <returns></returns>
-        public async Task<object> GetTblMenuParent()
+        public object GetTblMenuParent(bool switchData)
         {
             try
             {
-                var objData = await db.TblMenu.Where(m => m.ParentCode == "CRM" && m.IsDelete == false && m.IsActive == true).ToListAsync();
-                //List<TblMenu> lst = objData[0].OfType<TblMenu>().ToList();
+                List<TblMenu> data = new List<TblMenu>();
+                if (switchData)
+                {
+                    data = sp.GetTblMenuParent();
+                }
+                else
+                {
+                    data = db.TblMenu.Where(m => m.ParentCode == AccountConstant.MENU_PARENT_CODE && m.IsDelete == false && m.IsActive == true).ToList();
+                }
                 var obj = new object();
                 List<Object> lstObject = new List<object>();
-                foreach (var item in objData)
+                foreach (var item in data)
                 {
                     var tab = new object();
-                    if (item.MenuCode == "CIMS_LIST")
+                    if (item.MenuCode == AccountConstant.MENU_CIMS_LIST)
                     {
-                        tab = db.TblMenu.Where(m => m.MenuCode == "ATTR_FORM" && m.IsDelete == false && m.IsActive == true).FirstOrDefault();
+                        tab = db.TblMenu.Where(m => m.MenuCode == AccountConstant.MENU_ATTR_FORM && m.IsDelete == false && m.IsActive == true).FirstOrDefault();
+                        obj = new { data = item, tab = tab };
+                        lstObject.Add(obj);
+                    }
+                    else if (item.MenuCode == "CIMS_DETAIL")
+                    {
+                        tab = db.TblMenu.Where(m => m.MenuCode == "ATTR_FORM_DETAIL").FirstOrDefault();
                         obj = new { data = item, tab = tab };
                         lstObject.Add(obj);
                     }
@@ -1364,6 +1743,99 @@ namespace AccountManagement.DataAccess
         }
 
         /// <summary>
+        /// Hàm lấy danh sách quyền
+        /// @author: HaiHM
+        /// @createdDate: 17/07/2019
+        /// </summary>
+        /// <returns></returns>
+        private string StringRoles(TblRoleCheckViewModel role)
+        {
+            string result = "";
+            if(role.MenuCode != AccountConstant.MENU_VOC)
+            {
+                role.MenuCode = "";
+            }
+            if(role != null)
+            {
+                // Add role = true in string (role)
+                if (role.IsEncypt.Value)
+                {
+                    result += AccountConstant.CanEncypt + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsShowAll.Value)
+                {
+                    result += AccountConstant.CanShowAll + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsShow.Value)
+                {
+                    result += AccountConstant.CanShow + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsAdd.Value)
+                {
+                    result += AccountConstant.CanAdd + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsEditAll.Value)
+                {
+                    result += AccountConstant.CanEditAll + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsEdit.Value)
+                {
+                    result += AccountConstant.CanEdit + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsDeleteAll.Value)
+                {
+                    result += AccountConstant.CanDeleteAll + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsDelete.Value)
+                {
+                    result += AccountConstant.CanDelete + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsImport.Value)
+                {
+                    result += AccountConstant.CanImport + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsExport.Value)
+                {
+                    result += AccountConstant.CanExport + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsPrint.Value)
+                {
+                    result += AccountConstant.CanPrint + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsApprove.Value)
+                {
+                    result += AccountConstant.CanApprove + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsEnable.Value)
+                {
+                    result += AccountConstant.CanEnable + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsPermission.Value)
+                {
+                    result += AccountConstant.CanPermission + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsFirstExtend.Value)
+                {
+                    result += AccountConstant.CanFirstExtend + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsSecondExtend.Value)
+                {
+                    result += AccountConstant.CanSecondExtend + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsThirdExtend.Value)
+                {
+                    result += AccountConstant.CanThirdExtend + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+                if (role.IsFouthExtend.Value)
+                {
+                    result += AccountConstant.CanFouthExtend + role.MenuCode + AccountConstant.StringSlipSearch;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Function check permission
         /// CreatedBy: HaiHM
         /// CreatedDate: 11/5/2019
@@ -1377,81 +1849,11 @@ namespace AccountManagement.DataAccess
             {
                 string role = "";
                 List<List<dynamic>> obj = sp.JoinRolePermission(userId, MenuCode);
+                List<List<dynamic>> objVOC = sp.JoinRolePermission(userId, AccountConstant.MENU_VOC);
                 TblRoleCheckViewModel roleChild = obj[0].OfType<TblRoleCheckViewModel>().FirstOrDefault();
-
-                // Add role = true in string (role)
-                if (roleChild.IsEncypt.Value)
-                {
-                    role += AccountConstant.CanEncypt + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsShowAll.Value)
-                {
-                    role += AccountConstant.CanShowAll + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsShow.Value)
-                {
-                    role += AccountConstant.CanShow + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsAdd.Value)
-                {
-                    role += AccountConstant.CanAdd + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsEditAll.Value)
-                {
-                    role += AccountConstant.CanEditAll + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsEdit.Value)
-                {
-                    role += AccountConstant.CanEdit + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsDeleteAll.Value)
-                {
-                    role += AccountConstant.CanDeleteAll + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsDelete.Value)
-                {
-                    role += AccountConstant.CanDelete + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsImport.Value)
-                {
-                    role += AccountConstant.CanImport + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsExport.Value)
-                {
-                    role += AccountConstant.CanExport + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsPrint.Value)
-                {
-                    role += AccountConstant.CanPrint + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsApprove.Value)
-                {
-                    role += AccountConstant.CanApprove + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsEnable.Value)
-                {
-                    role += AccountConstant.CanEnable + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsPermission.Value)
-                {
-                    role += AccountConstant.CanPermission + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsFirstExtend.Value)
-                {
-                    role += AccountConstant.CanFirstExtend + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsSecondExtend.Value)
-                {
-                    role += AccountConstant.CanSecondExtend + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsThirdExtend.Value)
-                {
-                    role += AccountConstant.CanThirdExtend + AccountConstant.StringSlipSearch;
-                }
-                if (roleChild.IsFouthExtend.Value)
-                {
-                    role += AccountConstant.CanFouthExtend + AccountConstant.StringSlipSearch;
-                }
+                TblRoleCheckViewModel roleChildVOC = objVOC[0].OfType<TblRoleCheckViewModel>().FirstOrDefault();
+                role += StringRoles(roleChild);
+                role += StringRoles(roleChildVOC);
 
                 return role;
             }
@@ -1593,7 +1995,6 @@ namespace AccountManagement.DataAccess
             return result;
         }
 
-
         /// <summary>
         /// Function convert ImageToBase64 async
         /// CreateBy: HaiHM
@@ -1676,6 +2077,111 @@ namespace AccountManagement.DataAccess
                 var obj = new { code = 400, message = ex.Message };
                 return obj;
             }
+        }
+
+        /// <summary>
+        /// function kiểm tra xem có được giải mã hay không
+        /// - đầu tiên phải kiểm tra có quyền xem (khi mã hóa hay ko)
+        /// -> Nếu có quyền xem mã hóa => Kiểm tra xem trường đó đã mã hóa hay không
+        ///     -> Nếu mã hóa rồi ==> giải mã trả lại
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckRoleDecrypt(int userId, string Field, string ParentCode)
+        {
+            bool result = false;
+            // kiểm tra quyền
+            var dataChild = sp.JoinRolePermission(userId, AccountConstant.MENU_ADMIN_USER);
+            TblRoleCheckViewModel role = dataChild[0].OfType<TblRoleCheckViewModel>().FirstOrDefault();
+            if (role != null)
+            {
+                // Có giá trị trường encypt trong bảng tblRole
+                if (role.IsEncypt.HasValue)
+                {
+                    // có quyền xem dữ liệu mã hóa
+                    if (role.IsEncypt.Value)
+                    {
+                        // đếm xem có trường mã hóa theo module (ParentCode) hay không
+                        if (ListFieldEncrypted(Field, ParentCode, userId) != null)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Hàm lấy danh sách field đã được mã hóa theo module và field
+        /// @author: HaiHM
+        /// @created: 12/06/2019
+        /// </summary>
+        /// <param name="Field"></param>
+        /// <param name="ParentCode"></param>
+        /// <returns></returns>
+        private List<EncryptionViewModel> ListFieldEncrypted(string Field, string ParentCode, int userId)
+        {
+            List<EncryptionViewModel> lst = new List<EncryptionViewModel>();
+            try
+            {
+                // lấy ra danh sách các field được mã hóa
+                TblOrganization organization = GetOrganizationId(userId);
+                if (organization != null)
+                {
+                    var data = sp.ListtFieldEncrypted(Field, ParentCode, GetConnectionByOrgCode(organization.OrganizationCode));
+                    lst = data[0].OfType<EncryptionViewModel>().ToList<EncryptionViewModel>();
+                    if (lst != null)
+                    {
+                        if (lst.Count() > 0)
+                        {
+                            return lst.Select(x => new EncryptionViewModel()
+                            {
+                                ParentCode = x.ParentCode,
+                                Field = x.Field,
+                                UpdateDate = x.UpdateDate
+                            }).ToList();
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+
+            return lst;
+        }
+
+        /// <summary>
+        /// Function get connection của đơn vị
+        /// HaiHM
+        /// 11/06/2019
+        /// </summary>
+        /// <param name="orgCode"></param>
+        /// <returns></returns>
+        private string GetConnectionByOrgCode(string orgCode)
+        {
+            string connection = "";
+            List<List<dynamic>> obj = sp.GetAllConnection();
+            List<ConnectionStrings> lstUser = obj[0].OfType<ConnectionStrings>().ToList();
+            if (lstUser.Count() > 0)
+            {
+                foreach (var item in lstUser)
+                {
+                    if (item.ConnectionKey.Contains(orgCode + AccountConstant.ConnectionKey))
+                    {
+                        connection = item.ConnectionValue;
+                        break;
+                    }
+                }
+            }
+            return connection;
         }
     }
 }
