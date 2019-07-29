@@ -1,0 +1,3 @@
+D:\HiepPD1\MPS_CRM\AttributesManagement\obj\Debug\docker-compose.dcproj.CoreCompileInputs.cache
+D:\SVN_Code\1-WIP\12-User\HiepPD1\MPS_CRM\AttributesManagement\obj\Debug\docker-compose.dcproj.CoreCompileInputs.cache
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\AttributesManagement\obj\Debug\docker-compose.dcproj.CoreCompileInputs.cache

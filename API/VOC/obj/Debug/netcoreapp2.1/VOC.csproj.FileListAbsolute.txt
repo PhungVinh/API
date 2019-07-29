@@ -1,0 +1,14 @@
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\bin\Debug\netcoreapp2.1\VOC.deps.json
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\bin\Debug\netcoreapp2.1\VOC.runtimeconfig.json
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\bin\Debug\netcoreapp2.1\VOC.runtimeconfig.dev.json
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\bin\Debug\netcoreapp2.1\VOC.dll
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\bin\Debug\netcoreapp2.1\VOC.pdb
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\obj\Debug\netcoreapp2.1\VOC.csproj.CoreCompileInputs.cache
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\obj\Debug\netcoreapp2.1\VOC.RazorAssemblyInfo.cache
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\obj\Debug\netcoreapp2.1\VOC.RazorAssemblyInfo.cs
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\obj\Debug\netcoreapp2.1\UserSecretsAssemblyInfo.cs
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\obj\Debug\netcoreapp2.1\VOC.AssemblyInfoInputs.cache
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\obj\Debug\netcoreapp2.1\VOC.AssemblyInfo.cs
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\obj\Debug\netcoreapp2.1\VOC.RazorTargetAssemblyInfo.cache
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\obj\Debug\netcoreapp2.1\VOC.dll
+D:\MPS_SVN\MP_CRM\1.WIP\04.Development\02.Source\API\VOC\obj\Debug\netcoreapp2.1\VOC.pdb

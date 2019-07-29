@@ -1,0 +1,11 @@
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\ExampleOrganization\obj\Debug\netcoreapp2.1\ExampleOrganization.csproj.CoreCompileInputs.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\ExampleOrganization\obj\Debug\netcoreapp2.1\ExampleOrganization.AssemblyInfoInputs.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\ExampleOrganization\obj\Debug\netcoreapp2.1\ExampleOrganization.AssemblyInfo.cs
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\ExampleOrganization\bin\Debug\netcoreapp2.1\ExampleOrganization.deps.json
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\ExampleOrganization\bin\Debug\netcoreapp2.1\ExampleOrganization.runtimeconfig.json
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\ExampleOrganization\bin\Debug\netcoreapp2.1\ExampleOrganization.runtimeconfig.dev.json
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\ExampleOrganization\bin\Debug\netcoreapp2.1\ExampleOrganization.dll
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\ExampleOrganization\obj\Debug\netcoreapp2.1\ExampleOrganization.csprojAssemblyReference.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\ExampleOrganization\obj\Debug\netcoreapp2.1\ExampleOrganization.RazorAssemblyInfo.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\ExampleOrganization\obj\Debug\netcoreapp2.1\ExampleOrganization.RazorAssemblyInfo.cs
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\ExampleOrganization\obj\Debug\netcoreapp2.1\ExampleOrganization.RazorTargetAssemblyInfo.cache

@@ -1,0 +1,15 @@
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\bin\Debug\netcoreapp2.1\configuration.json
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\bin\Debug\netcoreapp2.1\APIGateway.deps.json
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\bin\Debug\netcoreapp2.1\APIGateway.runtimeconfig.json
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\bin\Debug\netcoreapp2.1\APIGateway.runtimeconfig.dev.json
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\bin\Debug\netcoreapp2.1\APIGateway.dll
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\bin\Debug\netcoreapp2.1\APIGateway.pdb
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\obj\Debug\netcoreapp2.1\APIGateway.csprojAssemblyReference.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\obj\Debug\netcoreapp2.1\APIGateway.csproj.CoreCompileInputs.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\obj\Debug\netcoreapp2.1\APIGateway.RazorAssemblyInfo.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\obj\Debug\netcoreapp2.1\APIGateway.RazorAssemblyInfo.cs
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\obj\Debug\netcoreapp2.1\APIGateway.AssemblyInfoInputs.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\obj\Debug\netcoreapp2.1\APIGateway.AssemblyInfo.cs
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\obj\Debug\netcoreapp2.1\APIGateway.RazorTargetAssemblyInfo.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\obj\Debug\netcoreapp2.1\APIGateway.dll
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\APIGateway\obj\Debug\netcoreapp2.1\APIGateway.pdb

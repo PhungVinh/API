@@ -1,0 +1,15 @@
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\bin\Release\netcoreapp2.1\AccountManagement.deps.json
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\bin\Release\netcoreapp2.1\AccountManagement.runtimeconfig.json
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\bin\Release\netcoreapp2.1\AccountManagement.runtimeconfig.dev.json
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\bin\Release\netcoreapp2.1\AccountManagement.dll
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\bin\Release\netcoreapp2.1\AccountManagement.pdb
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\obj\Release\netcoreapp2.1\AccountManagement.csprojAssemblyReference.cache
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\obj\Release\netcoreapp2.1\AccountManagement.csproj.CoreCompileInputs.cache
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\obj\Release\netcoreapp2.1\AccountManagement.RazorAssemblyInfo.cache
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\obj\Release\netcoreapp2.1\AccountManagement.RazorAssemblyInfo.cs
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\obj\Release\netcoreapp2.1\UserSecretsAssemblyInfo.cs
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\obj\Release\netcoreapp2.1\AccountManagement.AssemblyInfoInputs.cache
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\obj\Release\netcoreapp2.1\AccountManagement.AssemblyInfo.cs
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\obj\Release\netcoreapp2.1\AccountManagement.RazorTargetAssemblyInfo.cache
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\obj\Release\netcoreapp2.1\AccountManagement.dll
+D:\svn\MP-CRM\1.WIP\04.Development\02.Source\API\AccountManagement\AccountManagement\obj\Release\netcoreapp2.1\AccountManagement.pdb

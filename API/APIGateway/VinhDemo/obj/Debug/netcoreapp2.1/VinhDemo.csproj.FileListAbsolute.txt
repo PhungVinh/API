@@ -1,0 +1,15 @@
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\bin\Debug\netcoreapp2.1\VinhDemo.deps.json
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\bin\Debug\netcoreapp2.1\VinhDemo.runtimeconfig.json
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\bin\Debug\netcoreapp2.1\VinhDemo.runtimeconfig.dev.json
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\bin\Debug\netcoreapp2.1\VinhDemo.dll
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\bin\Debug\netcoreapp2.1\VinhDemo.pdb
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\obj\Debug\netcoreapp2.1\VinhDemo.csprojAssemblyReference.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\obj\Debug\netcoreapp2.1\VinhDemo.csproj.CoreCompileInputs.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\obj\Debug\netcoreapp2.1\VinhDemo.RazorAssemblyInfo.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\obj\Debug\netcoreapp2.1\VinhDemo.RazorAssemblyInfo.cs
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\obj\Debug\netcoreapp2.1\UserSecretsAssemblyInfo.cs
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\obj\Debug\netcoreapp2.1\VinhDemo.AssemblyInfoInputs.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\obj\Debug\netcoreapp2.1\VinhDemo.AssemblyInfo.cs
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\obj\Debug\netcoreapp2.1\VinhDemo.RazorTargetAssemblyInfo.cache
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\obj\Debug\netcoreapp2.1\VinhDemo.dll
+D:\svn\1.WIP\04.Development\02.Source\API\APIGateway\VinhDemo\obj\Debug\netcoreapp2.1\VinhDemo.pdb

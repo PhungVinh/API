@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2042
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccountManagement", "AccountManagement\AccountManagement.csproj", "{EF6845D1-56D7-4F0F-BCAC-658878868C4C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JWTAuthentication", "JWTAuthentication\JWTAuthentication.csproj", "{CDD0ABE3-481C-4C70-8287-E1C44B1C49DF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF6845D1-56D7-4F0F-BCAC-658878868C4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF6845D1-56D7-4F0F-BCAC-658878868C4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF6845D1-56D7-4F0F-BCAC-658878868C4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF6845D1-56D7-4F0F-BCAC-658878868C4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDD0ABE3-481C-4C70-8287-E1C44B1C49DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDD0ABE3-481C-4C70-8287-E1C44B1C49DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDD0ABE3-481C-4C70-8287-E1C44B1C49DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDD0ABE3-481C-4C70-8287-E1C44B1C49DF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EA33B42B-C479-46CC-9CED-012FE1C28200}
+	EndGlobalSection
+EndGlobal
