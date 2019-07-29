@@ -162,6 +162,13 @@ namespace OrganizationManagement.DataAccess
                             db.Entry(OrgChk).State = EntityState.Modified;
                             db.SaveChanges();
 
+                            TblConnectionConfig connect = db.TblConnectionConfig.Where(a => a.ConnectionKey == OrgChk.OrganizationCode + "Connection").FirstOrDefault();
+                            if(connect != null)
+                            {
+                                db.TblConnectionConfig.Remove(connect);
+                                db.SaveChanges();
+                            }
+
                             string urlImage = _environment.WebRootPath + OrganizationConstant.DirectoryUploads + OrgChk.OrganizationCode + "\\" + OrgChk.OrganizationCode + ".png";
                             try
                             {
@@ -583,6 +590,10 @@ namespace OrganizationManagement.DataAccess
             orgSP.ExecuteNonQuerySql(sqlCreateDB);
             script = script.Replace(OrganizationConstant.DATABASE_GO, OrganizationConstant.SPLIT_DATABASE);
             string[] arr = script.Split(OrganizationConstant.SPLIT_DATABASE);
+            string connectionKey = orgCode + OrganizationConstant.CONNECTION_CONFIG;
+            string connectionValue = OrganizationConstant.SQL_CONNECTION.Replace(OrganizationConstant.DATABASE_MASTER, dbName);
+            AddConnectionConfig(connectionKey, connectionValue);
+
             for (int i = 0; i < arr.Length; i++)
             {
                 string sqlQuery = "";
@@ -599,9 +610,7 @@ namespace OrganizationManagement.DataAccess
                 }
             }
             //Add connection config
-            string connectionKey = orgCode + OrganizationConstant.CONNECTION_CONFIG;
-            string connectionValue = OrganizationConstant.SQL_CONNECTION.Replace(OrganizationConstant.DATABASE_MASTER, dbName);
-            AddConnectionConfig(connectionKey, connectionValue);
+          
             //Set contextfactory
             //var objConn = new
             //{

@@ -21,6 +21,11 @@ namespace AttributesManagement.Constant
         public const string IsRequired = "Bắt Buộc";
         public const string IsTableShow = "Hiển thị ";
         public const string IsTableShow1 = "Hiển thị danh sách";
+        public const string IsInputValue = "rdInputvalue";
+        public const string IsGeneratingValue = "rdGeneratingValue";
+        public const string IsDependentValue = "rdDependentValue";
+        public const string Calculation = "rdCalculation";
+        public const string FunctionCalculation = "rdFunctionCalculation";
         public const string StringNullGetListConstraint = ",1,15";
         public const int PageCurent = 1;
         public const string StringTextSearch = "";
@@ -98,7 +103,8 @@ namespace AttributesManagement.Constant
         };
         #region Module
         public const string InformationForm = "CIMS_ADD";
-        public const string ListForm = "CIMS_FORM_LIST";
+        public const string ListForm = "CIMS_LIST";
+        public const string CIMS = "CIMS";
         #endregion
         #region ContextFactory
         public const string SQL_CONNECTION = "Server=192.168.50.149;initial catalog=CRM_MASTER;user id=sa;password=123@123a";

@@ -13,7 +13,7 @@ namespace AttributesManagement.ViewModel
         public string CategoryName { get; set; }
         public string ContraintsValue { get; set; }
         public string LinkContraints { get; set; }
-
+        public string CategoryCode { get; set; }
         public string chkDelete { get; set; }
     }
    

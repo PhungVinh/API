@@ -23,6 +23,7 @@ namespace AttributesManagement.Constant
         public const string MessageDulicateCategoryName = "error.titleexists";
 
         public const string MessageValidate = "Danh mục chưa được sử dụng";
+        public const string MS0001 = "Thông tin đã tồn tại trên hệ thống!";
 
         public const string titleDelete = "CategoryCode is being used";
         public const string errorKeyDelete = "CategoryUsing";

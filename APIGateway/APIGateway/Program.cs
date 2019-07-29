@@ -49,7 +49,7 @@
             builder.UseKestrel()
                    .UseContentRoot(Directory.GetCurrentDirectory())
                    .UseStartup<Startup>()
-                   .UseUrls("http://192.168.50.42:50000");
+                   .UseUrls("http://192.168.50.51:50000");
 
             var host = builder.Build();
             host.Run();

@@ -107,6 +107,10 @@
         public const string MENU_PROFILE_ORGANIZATION = "PROFILE_ORGANIZATION";
         public const string MENU_CIMS_LIST = "CIMS_LIST";
         public const string MENU_ADMIN_USER = "ADMIN_USER";
+        public const string MENU_OMS = "OMS";
+        public const string MENU_ATTR_FORM = "ATTR_FORM";
+        public const string MENU_VOC = "VOC";
+
 
 
         #region Email
@@ -125,7 +129,7 @@
         public const string From = "From:";
         public const string PathURL = "wwwroot/";
         public const string PathURLFolder = "wwwroot/Uploads/";
-        public const string ApiLinkReset = "http://192.168.50.37:90/auth/reset-password-finish";
+        public const string ApiLinkReset = "http://192.168.50.37:90/auth/reset-password-finish?";
         public const string ApiLinkCreated = "http://192.168.50.37:90";
         public const string SubjectSendMailReset = "Reset mật khẩu!";
         public const string SubjectSendMailCreated = "Thông tin tài khoản CRM!";
@@ -226,10 +230,10 @@
         public const string MessageUpdateUserFail = "UpdateUser Fail";
         public const string MessageUpdateUserSuccess = "Cập nhật thông tin thành công";
 
-        public const string TypeNullToken = "error.nulltoken";
-        public const string TitleNullToken = "error.nulltoken";
-        public const string MessageNullToken = "nulltoken";
-        public const string MessageTokenResetOk = "Token Valid";
+        public const string TypeNullToken = "error.paraminvalid";
+        public const string TitleNullToken = "Param invalid";
+        public const string MessageNullToken = "Param invalid";
+        public const string MessageTokenResetOk = "Tham số không hợp lệ";
 
         public const string TypeInValidToken = "error.tokeninvalid";
         public const string MessageTokenResetFail = "Token Invalid";
@@ -318,7 +322,6 @@
         public const string TitleTokenInvalid = "error.tokeninvalid";
 
         #endregion
-        public static string SQL_CONNECTION = "Server=192.168.50.149;initial catalog=CRM_MASTER;user id=sa;password=123@123a";
 
         #region Role
         public const string CanEncypt = "CanEncypt";
@@ -373,5 +376,30 @@
         public const string LinkDefaulfLogoGirl = "Default/AvatarGirl.jpg";
         public const string LinkDefaulfLogoBoy = "Default/AvatarBoy.png";
 
+
+        #region Reset pass custom - 10/6/2019 - HaiHM
+        public const string username = "username";
+        public const string codeReset = "codeReset";
+        public const string And = "&";
+
+        #endregion
+
+        #region
+        //Using encrypt or decrypt
+        public const string SQL_CONNECTION = "Server=192.168.50.149;initial catalog=CRM_MASTER;user id=sa;password=123@123a";
+        public const string MASTER_STORE_PROC = "GetAllConnection";
+        public const string keyString = "*hTniPGgDukF$eow";
+        public const string ENCRYPTIONKEY = "A1B2C3D4";
+        public const string ConnectionKey = "Connection";
+        public const string sp_CheckHasDataEncrypted = "sp_CheckHasDataEncrypted";
+        public const string sp_GetAllCategoryByTypeCode = "sp_GetAllCategoryByTypeCode";
+        public const string FieldMenuAdminUser = "";
+        public const string FieldEncryptedFullName = "FullName";
+        public const string FieldEncryptedAddress = "Address";
+        public const string Position = "Position";
+        public const string Department = "Department";
+        public const string Business = "Business";
+
+        #endregion
     }
 }

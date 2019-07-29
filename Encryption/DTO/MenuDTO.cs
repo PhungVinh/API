@@ -7,7 +7,7 @@ namespace Encryption.DTO
 {
     public class MenuDTO
     {
-        public string MenuCode { get; set; }
-        public string MenuName { get; set; }
+        public List<EncryptionDTO> AttributesEncryption { get; set; }
+        public DateTime SchedulerTime { get; set; }
     }
 }

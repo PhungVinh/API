@@ -1,8 +1,0 @@
-version: '3.4'
-
-services:
-  cims:
-    image: ${DOCKER_REGISTRY}cims
-    build:
-      context: .
-      dockerfile: CIMS\Dockerfile

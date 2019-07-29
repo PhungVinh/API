@@ -1,8 +1,0 @@
-version: '3.4'
-
-services:
-  kms:
-    image: ${DOCKER_REGISTRY}kms
-    build:
-      context: .
-      dockerfile: ..\KMS\Dockerfile

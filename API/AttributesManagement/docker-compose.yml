@@ -1,8 +1,0 @@
-version: '3.4'
-
-services:
-  attributesmanagement:
-    image: ${DOCKER_REGISTRY}attributesmanagement
-    build:
-      context: .
-      dockerfile: AttributesManagement\Dockerfile

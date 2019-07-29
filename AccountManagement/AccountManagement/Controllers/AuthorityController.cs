@@ -37,7 +37,7 @@ namespace AccountManagement.Controllers
         [Route("~/api/Authority/SearchAuthority")]
         [HttpGet]
         [Authorize]
-        public object GetAuthorityList(string textSearch, int currPage, int Record)
+        public object GetAuthorityList(string textSearch, int currPage, int recordperpage)
         {
             // GetOrg
             string orgCode = User.Claims.Where(u => u.Type == AuthorityConstant.orgCode).FirstOrDefault().Value;
@@ -55,7 +55,7 @@ namespace AccountManagement.Controllers
             
             string arr = textSearch + AccountConstant.StringSlipSearch
                    + currPage + AccountConstant.StringSlipSearch
-                   + Record + AccountConstant.StringSlipSearch
+                   + recordperpage + AccountConstant.StringSlipSearch
                    + userId + AccountConstant.StringSlipSearch
                    + org.OrganizationId
                    ;

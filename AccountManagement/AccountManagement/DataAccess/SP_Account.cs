@@ -1,4 +1,5 @@
-﻿using AccountManagement.Models;
+﻿using AccountManagement.Constant;
+using AccountManagement.Models;
 using AccountManagement.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -221,23 +222,34 @@ namespace AccountManagement.DataAccess
         public List<TblMenu> GetTblMenuParent()
         {
             // Initialization.  
-            List<TblMenu> lst = new List<TblMenu>();
+            //List<TblMenu> lst = new List<TblMenu>();
+            //try
+            //{
+            //   // SqlParameter usernameParam = new SqlParameter("@RoleId", roleId.ToString() ?? (object)DBNull.Value);
+
+            //    // Processing.  
+            //    string sqlQuery = "EXEC [dbo].[sp_LoadMenuParent] ";
+            //    lst = db.TblMenu.FromSql(sqlQuery).ToList<TblMenu>();
+            //   // lst = db.Query<TblMenu>().FromSql(sqlQuery).ToListAsync().Result;
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw ex;
+            //}
+
+            // Info.  
+            //return lst;
+            // Initialization.  
             try
             {
-               // SqlParameter usernameParam = new SqlParameter("@RoleId", roleId.ToString() ?? (object)DBNull.Value);
-
-                // Processing.  
-                string sqlQuery = "EXEC [dbo].[sp_LoadMenuParent] ";
-                lst = db.TblMenu.FromSql(sqlQuery).ToList<TblMenu>();
-               // lst = db.Query<TblMenu>().FromSql(sqlQuery).ToListAsync().Result;
+                 var objData = ExecuteMultipleResults("sp_LoadMenuParent", null, typeof(TblMenu));
+                List<TblMenu> lst = objData[0].OfType<TblMenu>().ToList();
+                return lst;
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-
-            // Info.  
-            return lst;
         }
 
         #region Service Pack
@@ -277,13 +289,13 @@ namespace AccountManagement.DataAccess
         /// CreatedDate: 24/4/2019
         /// </summary>
         /// <returns></returns>
-        public List<List<dynamic>> GetAllCategory(string CategoryTypeCode)
+        public List<List<dynamic>> GetAllCategory(string CategoryTypeCode, string connection)
         {
             // Initialization.  
             try {
                 SqlParameter[] para = new SqlParameter[1];
                 para[0] = new SqlParameter("@CategoryTypeCode", CategoryTypeCode);
-                return ExecuteMultipleResults("GetAllCategory", para, typeof(TblCategory));
+                return ExecuteMultipleResults(AccountConstant.sp_GetAllCategoryByTypeCode, para, connection, typeof(TblCategory));
             }
             catch (Exception ex)
             {
@@ -292,5 +304,103 @@ namespace AccountManagement.DataAccess
             // Info.  
         }
 
+        /// <summary>
+        /// Function get all connection
+        /// CreatedBy: HaiHM
+        /// CreatedDate: 11/06/2019
+        /// </summary>
+        /// <returns></returns>
+        public List<List<dynamic>> GetAllConnection()
+        {
+            return ExecuteMultipleResults(AccountConstant.MASTER_STORE_PROC, null, AccountConstant.SQL_CONNECTION, typeof(ConnectionStrings));
+        }
+
+        /// <summary>
+        /// Executes the specified parameters.
+        /// </summary>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="returnTypes">The return types.</param>
+        /// <returns></returns>
+        public List<List<dynamic>> ExecuteMultipleResults(string spName, SqlParameter[] parameters, string connection, params Type[] types)
+        {
+            List<List<dynamic>> results = new List<List<dynamic>>();
+            SqlConnection sqlConnection = new SqlConnection(connection);
+            var command = sqlConnection.CreateCommand();
+            command.CommandText = spName;
+            command.CommandType = CommandType.StoredProcedure;
+
+            if (parameters != null && parameters.Any())
+            {
+                command.Parameters.AddRange(parameters);
+            }
+
+            if (command.Connection.State != ConnectionState.Open)
+            {
+                command.Connection.Open();
+            }
+
+            int counter = 0;
+            using (var reader = command.ExecuteReader())
+            {
+                do
+                {
+                    var innerResults = new List<dynamic>();
+
+                    if (counter > types.Length - 1) { break; }
+
+                    while (reader.Read())
+                    {
+                        var item = Activator.CreateInstance(types[counter]);
+
+                        for (int inc = 0; inc < reader.FieldCount; inc++)
+                        {
+                            Type type = item.GetType();
+                            string name = reader.GetName(inc);
+                            PropertyInfo property = type.GetProperty(name);
+
+                            if (property != null && name == property.Name)
+                            {
+                                var value = reader.GetValue(inc);
+                                if (value != null && value != DBNull.Value)
+                                {
+                                    property.SetValue(item, Convert.ChangeType(value, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType), null);
+                                }
+                            }
+                        }
+                        innerResults.Add(item);
+                    }
+                    results.Add(innerResults);
+                    counter++;
+                }
+                while (reader.NextResult());
+                reader.Close();
+                command.Connection.Close();
+            }
+            return results;
+        }
+
+        /// <summary>
+        /// Hàm lấy tất cả các field của module cần mã hóa theo module và field
+        /// @aurhorCreated: HaiHM
+        /// @dateCreated: 12/06/2019
+        /// </summary>
+        /// <param name="AttributeLabel"> Field </param>
+        /// <param name="ParentCode"> Module </param>
+        /// <returns></returns>
+        public List<List<dynamic>> ListtFieldEncrypted(string attributeLabel, string parentCode, string connection)
+        {
+            try
+            {
+                SqlParameter[] para = new SqlParameter[2];
+                para[0] = new SqlParameter("@AttributeLabel", attributeLabel);
+                para[1] = new SqlParameter("@ParentCode", parentCode);
+                return ExecuteMultipleResults(AccountConstant.sp_CheckHasDataEncrypted, para, connection, typeof(EncryptionViewModel));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
     }
 }

@@ -13,6 +13,8 @@ namespace AttributesManagement.Models
         public int AttributeCol { get; set; }
         public string AttributeType { get; set; }
         public string DataType { get; set; }
+        public int? MaximumLength { get; set; }
+        public int? MinimumLength { get; set; }
         public string LabelControlForm { get; set; }
         public bool IsCategory { get; set; }
         public bool IsRequired { get; set; }

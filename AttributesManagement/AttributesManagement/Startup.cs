@@ -51,11 +51,8 @@ namespace AttributesManagement
                 RequireExpirationTime = true,
             };
 
-            services.AddAuthentication(o =>
-            {
-                o.DefaultAuthenticateScheme = "TestKey";
-            })
-            .AddJwtBearer("TestKey", x =>
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(x =>
             {
                 x.RequireHttpsMetadata = false;
                 x.TokenValidationParameters = tokenValidationParameters;
@@ -66,6 +63,7 @@ namespace AttributesManagement
             services.AddTransient<CRM_MPContext>();
             services.AddTransient<IAttributeRepository, AttributeDA>();
             services.AddTransient<IcategoryRepository, CategoryDA>();
+            services.AddTransient<IExportAndImportRepository, ImportExportDA>();
             //Su dung httpcontext
             services.AddHttpContextAccessor();
             //Su dung cache

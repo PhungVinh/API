@@ -28,12 +28,16 @@ namespace CIMS.Controllers
 
         private CimsRepository _cimsRepository;
         private string _organizationCode;
+        private object httpContextAccessor;
+        //private IHttpContextAccessor httpContextAccessor;
+
         public CimsController(IHttpContextAccessor contextAccessor, CimsRepository cimsRepository, IDistributedCache distributedCache)
         {
             string token = contextAccessor.HttpContext.Request.Headers[CimsConstant.Authorization];
             token = token.Length != 0 ? token.Replace(CimsConstant.BearerReplace, string.Empty) : string.Empty;
             var arr = new JwtSecurityToken(token);
             string orgCode = arr.Claims.ToList()[2].Value; //+ CimsConstant.ConnectionAdd;
+             
             _organizationCode = orgCode;
             cimsRepository.LoadContext(orgCode, distributedCache);
             _cimsRepository = cimsRepository;
@@ -64,9 +68,10 @@ namespace CIMS.Controllers
         [Route("~/api/Cims/GetCimsvalue")]
         [HttpGet]
         [Authorize]
-        public object GetCimsvalue(string ModuleParent, int currPage, int recodperpage)
+        public object GetCimsvalue(string ModuleParent, int currPage, int recordperpage)
         {
-            return _cimsRepository.GetCimsvalue(ModuleParent, currPage, recodperpage);
+            var ModuleCIMS = CimsConstant.ModuleCIMS;
+            return _cimsRepository.GetCimsvalue(ModuleCIMS, currPage, recordperpage);
         }
 
 
@@ -131,7 +136,9 @@ namespace CIMS.Controllers
                 });
             }
             lstCustomer.Remove(recordId);
-            object code = _cimsRepository.EditCimsValue(lstCustomer, recordId.AttributeValue);
+
+            string username = User.Claims.FirstOrDefault().Value;
+            object code = _cimsRepository.EditCimsValue(lstCustomer, recordId.AttributeValue, username);
             if (code.GetType() == typeof(List<object>))
             {
                 return BadRequest(code);
@@ -155,7 +162,9 @@ namespace CIMS.Controllers
             {
                 return BadRequest(ModelState);
             }
-            object code = _cimsRepository.AddCimsValue(cims);
+         
+            string username = User.Claims.FirstOrDefault().Value;
+            object code = _cimsRepository.AddCimsValue(cims, username);
             if (code.GetType() == typeof(List<object>))
             {
                 return BadRequest(code);

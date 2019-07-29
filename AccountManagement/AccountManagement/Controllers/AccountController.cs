@@ -60,6 +60,7 @@ namespace AccountManagement.Controllers
         [HttpPost]
         public object Login([FromBody]TblUserLogin login)
         {
+          
             ErrorObject response = new ErrorObject();
             ResponseMessage rm = new ResponseMessage();
             if (string.IsNullOrEmpty(login.UserName) || string.IsNullOrEmpty(login.Password))
@@ -231,7 +232,8 @@ namespace AccountManagement.Controllers
         {
             string orgCode = User.Claims.Where(u => u.Type == AuthorityConstant.orgCode).FirstOrDefault().Value;
             string username = User.Claims.FirstOrDefault().Value;
-            return _accountRepository.GetUsersCustom(username, orgCode);
+            int userId = Int32.Parse(User.Claims.Where(u => u.Type == AccountConstant.userId).FirstOrDefault().Value);
+            return _accountRepository.GetUsersCustom(username, orgCode, userId);
         }
 
         /// <summary>
@@ -346,6 +348,7 @@ namespace AccountManagement.Controllers
                 }
             }
             string username = User.Claims.FirstOrDefault().Value;
+            int userId = Int32.Parse(User.Claims.Where(u => u.Type == AccountConstant.userId).FirstOrDefault().Value);
             TblOrganization org = _authorityRepository.GetOrganization(orgCode);
             if (org != null)
             {
@@ -365,11 +368,11 @@ namespace AccountManagement.Controllers
                     {
                         model.tblUsers.UserName = orgCode + model.tblUsers.UserName;
                     }
-                    
+
                     model.tblOrganization = org;
                     model.tblUsers.CreateBy = username;
                     model.tblUsers.UpdateBy = username;
-                    int save = _accountRepository.AddUser(model);
+                    int save = _accountRepository.AddUser(model, userId);
                     //_accountRepository.SetStringCache(AccountConstant.GetUserList, _accountRepository.SearchUser(AccountConstant.StringNullGetListUser));
                     //_accountRepository.GetStringCache(AccountConstant.GetUserList);
 
@@ -528,7 +531,7 @@ namespace AccountManagement.Controllers
             model.tblUsers.UpdateBy = username;
             if (org != null)
             {
-                if (model.tblUsers.IsLock == true || _accountRepository.CheckServicePack(org) || 
+                if (model.tblUsers.IsLock == true || _accountRepository.CheckServicePack(org) ||
                         model.tblUsers.IsLock == _accountRepository.GetUserById(model.tblUsers.Id).IsLock)
                 {
                     orgCode = orgCode.ToLower() + AccountConstant.GachDuoi;
@@ -539,7 +542,7 @@ namespace AccountManagement.Controllers
                     }
                     model.tblOrganization = org;
                     model.tblUsers.UpdateBy = username;
-                    int edit = _accountRepository.EditUser(model);
+                    int edit = _accountRepository.EditUser(model, userId);
                     //_accountRepository.SetStringCache(AccountConstant.GetUserList, _accountRepository.SearchUser(AccountConstant.StringNullGetListUser));
                     //_accountRepository.GetStringCache(AccountConstant.GetUserList);
 
@@ -617,7 +620,7 @@ namespace AccountManagement.Controllers
             var lst = User.Claims.Where(u => u.Type == ClaimTypes.Role).Select(u => u.Value).ToList();
             if (lst != null)
             {
-                if (lst.Contains(AccountConstant.CanEdit ) && !lst.Contains(AccountConstant.CanEditAll))
+                if (lst.Contains(AccountConstant.CanEdit) && !lst.Contains(AccountConstant.CanEditAll))
                 {
                     int userId = Int32.Parse(User.Claims.Where(u => u.Type == AccountConstant.userId).FirstOrDefault().Value);
                     if (!_accountRepository.CheckPermission(userId, user.Id))
@@ -669,15 +672,19 @@ namespace AccountManagement.Controllers
         /// Function check token in email
         /// CreateBy: HaiHM
         /// CreatedDate: 20/04/2019
+        /// ModifiedDate: 10/06/2019
+        /// ModifiedBody: rút gọn nội dung token
         /// </summary>
         /// <returns></returns>
         [AllowAnonymous]
         [Route("~/api/Account/CheckTokenResetPass")]
         [HttpGet]
-        public IActionResult CheckTokenResetPass([FromQuery]string token)
+        public IActionResult CheckTokenResetPass(string username, string codeReset)
         {
+            //int userId = Int32.Parse(User.Claims.Where(u => u.Type == AccountConstant.userId).FirstOrDefault().Value);
+
             // Delete token
-            string tokenCheck = accountCommon.MD5Hash(token);
+            string tokenCheck = accountCommon.MD5Hash(username + codeReset);
             var blackList = _accountRepository.GetStringCache(AccountConstant.ListLogoutToken);
             if (blackList != null && tokenCheck != null)
             {
@@ -688,7 +695,7 @@ namespace AccountManagement.Controllers
             }
             ErrorObject response = new ErrorObject();
             ResponseMessage rm = new ResponseMessage();
-            if (string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(codeReset))
             {
                 rm.Type = AccountConstant.TypeNullToken;
                 rm.Title = AccountConstant.TitleNullToken;
@@ -698,17 +705,17 @@ namespace AccountManagement.Controllers
 
                 return StatusCode(400, Json(rm));
             }
-            if (CheckTokenReset(token))
+            if (_accountRepository.CheckTokenReset(username, codeReset))
             {
-                //Updated User
-                TblUsers user = DecodeTokenUser(token);
+                TblUsers user = _accountRepository.GetUsers(username);
                 if (user != null)
                 {
                     user.EmailConfirmed = false;
+                    // xóa mật khẩu cũ
                     user.Password = accountCommon.HashPassword(accountCommon.CreateRandomPassword());
-                    _accountRepository.UpdateUser(user, false);
-
-                    var obj = new { mustChangePassword = true, token = token };
+                    _accountRepository.UpdateUser(user, false, true, false, 0);
+                    //string token = _accountRepository.GenerateJSONWebTokenReset(user);
+                    var obj = new { token = true };
                     return Json(obj);
                 }
                 return BadRequest();
@@ -722,34 +729,7 @@ namespace AccountManagement.Controllers
             }
         }
 
-        /// <summary>
-        /// Function Check Token Reset
-        /// CreateBy: HaiHM
-        /// CreatedDate: 20/04/2019
-        /// </summary>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        private bool CheckTokenReset(string token)
-        {
-            bool result = false;
-            try
-            {
-                var arr = new JwtSecurityToken(token);
-                var ab = arr.Claims.ToArray();
-                DateTime check = DateTime.Parse(ab[2].Value);
-                //DateTime expLogin = DateTime.Parse(User.Claims.Where(u => u.Type == AccountConstant.ExpLogin).FirstOrDefault().Value);
-                if (DateTime.Now <= check)
-                {
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return false;
-            }
-            return result;
-        }
+        
 
         /// <summary>
         /// Function change password Account
@@ -815,6 +795,10 @@ namespace AccountManagement.Controllers
 
             if (changePass == AccountConstant.ChangePasswordSuccess)
             {
+                // cập nhật lại thông tin
+                user.DateUpdatePassword = null;
+                user.CodeReset = null;
+                _accountRepository.UpdateUser(user, false, false, true, userId);
                 //Destroy Token
                 token = token.Length != 0 ? token.Replace(AccountConstant.BearerReplace, string.Empty) : string.Empty;
                 token = accountCommon.MD5Hash(token);
@@ -853,6 +837,131 @@ namespace AccountManagement.Controllers
                 response.status = AccountConstant.statusError;
                 response.message = AccountConstant.MessageChangePassInputPassFail;
                 return StatusCode(400, Json(response));
+            }
+        }
+
+        /// <summary>
+        /// Function change password Account
+        /// CreateBy: HaiHM
+        /// CreatedDate: 20/04/2019
+        /// </summary>
+        /// <param name="viewModel">object</param>
+        /// <returns></returns>
+        [Route("~/api/Account/ChangePasswordReset")]
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult ChangePasswordReset([FromBody] ChangePassViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            ErrorObject response = new ErrorObject();
+            ResponseMessage rm = new ResponseMessage();
+            FieldErrors error = new FieldErrors();
+
+            if (string.IsNullOrEmpty(viewModel.Pass1) 
+                || string.IsNullOrEmpty(viewModel.Pass2)
+                || string.IsNullOrEmpty(viewModel.username)
+                || string.IsNullOrEmpty(viewModel.codeReset))
+            {
+                List<FieldErrors> lsterror = new List<FieldErrors>();
+                if (string.IsNullOrEmpty(viewModel.Pass1))
+                {
+                    error.objectName = AccountConstant.TypeUser;
+                    error.field = AccountConstant.FieldPass1;
+                    error.message = AccountConstant.MessageTypeNullEmail;
+                    lsterror.Add(error);
+                }
+                if (string.IsNullOrEmpty(viewModel.Pass2))
+                {
+                    error.objectName = AccountConstant.TypeUser;
+                    error.field = AccountConstant.FieldPass2;
+                    error.message = AccountConstant.MessageTypeNullEmail;
+                    lsterror.Add(error);
+                }
+                if (string.IsNullOrEmpty(viewModel.username))
+                {
+                    error.objectName = AccountConstant.TypeUser;
+                    error.field = AccountConstant.username;
+                    error.message = AccountConstant.MessageTypeNullEmail;
+                    lsterror.Add(error);
+                }
+                if (string.IsNullOrEmpty(viewModel.codeReset))
+                {
+                    error.objectName = AccountConstant.TypeUser;
+                    error.field = AccountConstant.codeReset;
+                    error.message = AccountConstant.MessageTypeNullEmail;
+                    lsterror.Add(error);
+                }
+                rm.Type = AccountConstant.TypeUser;
+                rm.Title = AccountConstant.TitleNullNewPassword;
+                rm.Message = AccountConstant.MessageNullNewPasswordFail;
+                rm.Status = AccountConstant.statusError;
+                var field = new { fieldErrors = lsterror };
+                rm.fieldError = field;
+                return StatusCode(400, Json(rm));
+            }
+            if(_accountRepository.CheckTokenReset(viewModel.username, viewModel.codeReset))
+            {
+                TblUsers user = _accountRepository.GetUsers(viewModel.username);
+                if (user == null)
+                {
+                    rm.Type = AccountConstant.TypeUser;
+                    rm.Title = AccountConstant.TitleTokenInvalid;
+                    rm.Message = AccountConstant.MessageTokenResetFail;
+                    rm.Status = AccountConstant.statusError;
+                    var field = new { fieldErrors = rm.Title };
+
+                    return StatusCode(400, Json(rm));
+                }
+                int changePass = _accountRepository.ChangePassword(viewModel, user);
+
+                if (changePass == AccountConstant.ChangePasswordSuccess)
+                {
+                    // cập nhật lại thông tin
+                    user.DateUpdatePassword = null;
+                    user.CodeReset = null;
+                    //int userId = Int32.Parse(User.Claims.Where(u => u.Type == AccountConstant.userId).FirstOrDefault().Value);
+                    _accountRepository.UpdateUser(user, false, false, true, 0);
+                    
+                    object obj = new { message = AccountConstant.MessageNewPasswordSuccess};
+                    return StatusCode(200, obj);
+                }
+                else if (changePass == AccountConstant.ChangePasswordDuplicateOldPass)
+                {
+                    response.entityName = AccountConstant.TypeUser;
+                    response.errorKey = AccountConstant.ErrorKeyChangePassFail;
+                    response.title = AccountConstant.TitleChangePassFail;
+                    response.status = AccountConstant.statusSuccess;
+                    response.message = AccountConstant.MessageChangePassFail;
+                    return StatusCode(400, Json(response));
+                }
+                else if (changePass == AccountConstant.NotSame)
+                {
+                    response.entityName = AccountConstant.TypeUser;
+                    response.errorKey = AccountConstant.ErrorKeyChangePassNotSame;
+                    response.title = AccountConstant.TitleChangePassNotSame;
+                    response.status = AccountConstant.statusError;
+                    response.message = AccountConstant.MessageChangePassNotSame;
+                    return StatusCode(400, Json(response));
+                }
+                else
+                {
+                    response.entityName = AccountConstant.TypeUser;
+                    response.errorKey = AccountConstant.ErrorKeyChangeInputPassFail;
+                    response.title = AccountConstant.TitleChangePassInputPassFail;
+                    response.status = AccountConstant.statusError;
+                    response.message = AccountConstant.MessageChangePassInputPassFail;
+                    return StatusCode(400, Json(response));
+                }
+            }
+            else
+            {
+                response.errorKey = AccountConstant.TypeInValidToken;
+                response.status = AccountConstant.statusError;
+                response.message = AccountConstant.MessageTokenResetFail;
+                return StatusCode(400, new JsonResult(response));
             }
         }
 
@@ -1114,6 +1223,8 @@ namespace AccountManagement.Controllers
         [Authorize(Policy = AccountConstant.PolicyDelete)]
         public IActionResult DeleteUser(int id)
         {
+            int userId = Int32.Parse(User.Claims.Where(u => u.Type == AccountConstant.userId).FirstOrDefault().Value);
+            string username = User.Claims.FirstOrDefault().Value;
 
             if (!ModelState.IsValid)
             {
@@ -1125,7 +1236,6 @@ namespace AccountManagement.Controllers
             {
                 if (lst.Contains(AccountConstant.CanDelete) && !lst.Contains(AccountConstant.CanDeleteAll))
                 {
-                    int userId = Int32.Parse(User.Claims.Where(u => u.Type == AccountConstant.userId).FirstOrDefault().Value);
                     if (!_accountRepository.CheckPermission(userId, id))
                     {
                         return StatusCode(403);
@@ -1146,7 +1256,7 @@ namespace AccountManagement.Controllers
 
                 return StatusCode(400, Json(rm));
             }
-            int delete = _accountRepository.DeleteUser(id);
+            int delete = _accountRepository.DeleteUser(id, username);
             //_accountRepository.SetStringCache(AccountConstant.GetUserList, _accountRepository.SearchUser(AccountConstant.StringNullGetListUser));
             //_accountRepository.GetStringCache(AccountConstant.GetUserList);
 
@@ -1179,7 +1289,7 @@ namespace AccountManagement.Controllers
         [Route("~/api/Account/SearchUser")]
         [HttpGet]
         [Authorize(Policy = AccountConstant.PolicyShow)]
-        public async Task<Object> SearchUser(string textSearch, string isActive, string orgCode, string currPage, string Record)
+        public async Task<Object> SearchUser(string textSearch, string isActive, string orgCode, string currPage, string recordperpage)
         {
             try
             {
@@ -1198,18 +1308,18 @@ namespace AccountManagement.Controllers
                 {
                     currPage = currPage.Trim();
                 }
-                if (!string.IsNullOrEmpty(Record))
+                if (!string.IsNullOrEmpty(recordperpage))
                 {
-                    Record = Record.Trim();
+                    recordperpage = recordperpage.Trim();
                 }
                 string arr = userId + AccountConstant.StringSlipSearch
                        + textSearch + AccountConstant.StringSlipSearch
                        + isActive + AccountConstant.StringSlipSearch
                        + orgCode + AccountConstant.StringSlipSearch
                        + currPage + AccountConstant.StringSlipSearch
-                       + Record;
+                       + recordperpage;
 
-                return await _accountRepository.SearchUser(arr);
+                return await _accountRepository.SearchUser(userId, arr);
             }
             catch(Exception ex)
             {
@@ -1231,7 +1341,10 @@ namespace AccountManagement.Controllers
         {
             if (!string.IsNullOrEmpty(CategoryTypeCode))
             {
-                return _accountRepository.GetAllCategory(CategoryTypeCode);
+                string orgCode = User.Claims.Where(u => u.Type == AuthorityConstant.orgCode).FirstOrDefault().Value;
+                var response = new { data = _accountRepository.GetAllCategory(CategoryTypeCode, orgCode, String.Empty) };
+                return response;
+
             }
             return BadRequest();
         }
@@ -1264,8 +1377,8 @@ namespace AccountManagement.Controllers
 
                 return StatusCode(400, Json(rm));
             }
-            
-            int updateSelf = _accountRepository.UpdateUser(user, false);
+            int userId = Int32.Parse(User.Claims.Where(u => u.Type == AccountConstant.userId).FirstOrDefault().Value);
+            int updateSelf = _accountRepository.UpdateUser(user, false, false, false, userId);
 
             //_accountRepository.SetStringCache(AccountConstant.GetUserList, _accountRepository.SearchUser(AccountConstant.StringNullGetListUser));
             //_accountRepository.GetStringCache(AccountConstant.GetUserList);
@@ -1308,7 +1421,23 @@ namespace AccountManagement.Controllers
         [Authorize]
         public async Task<object> GetTblMenuParent()
         {
-            var obj = await _accountRepository.GetTblMenuParent();
+            var obj = _accountRepository.GetTblMenuParent(false);
+            _accountRepository.SetStringCache(AccountConstant.GetTblMenuParent, obj);
+            return await _accountRepository.GetStringAsync(AccountConstant.GetTblMenuParent);
+        }
+
+        /// <summary>
+        /// Function using for get parent Menu -- ParentCode = CRM
+        /// CreateBy: HaiHM
+        /// CreatedDate: 20/04/2019
+        /// </summary>
+        /// <returns></returns>
+        [Route("~/api/Account/GetModuleParent")]
+        [HttpGet]
+        [Authorize]
+        public async Task<object> GetModuleParent()
+        {
+            var obj = _accountRepository.GetTblMenuParent(true);
             _accountRepository.SetStringCache(AccountConstant.GetTblMenuParent, obj);
             return await _accountRepository.GetStringAsync(AccountConstant.GetTblMenuParent);
         }
@@ -1407,8 +1536,11 @@ namespace AccountManagement.Controllers
                     {
                         string str = null;
                         string username = User.Claims.FirstOrDefault().Value;
-                        string fileNameCustom = username + Path.GetExtension(fileName); ;
-
+                        string fileNameCustom = username + Path.GetExtension(fileName);
+                        if ((System.IO.File.Exists(_environment.WebRootPath + AccountConstant.DirectoryUploads + orgCode + AccountConstant.DirectorySlat + fileNameCustom)))
+                        {
+                            System.IO.File.Delete(_environment.WebRootPath + AccountConstant.DirectoryUploads + orgCode + AccountConstant.DirectorySlat + fileNameCustom);
+                        }
                         // Get Directory Organization
                         if (!Directory.Exists(_environment.WebRootPath + AccountConstant.DirectoryUploads + orgCode + AccountConstant.DirectorySlat))
                         {
@@ -1427,7 +1559,7 @@ namespace AccountManagement.Controllers
                             //string base64 = await _accountRepository.ImageToBase64Async(str);
                             string avatar = orgCode + AccountConstant.DirectorySlat + fileNameCustom;
                             user.Avatar = avatar.Replace("\\", "/");
-                            _accountRepository.UpdateUser(user, true);
+                            _accountRepository.UpdateUser(user, true, false, false, userId);
                             var obj = new { data = avatar };
                             return StatusCode(201, obj);
                         }

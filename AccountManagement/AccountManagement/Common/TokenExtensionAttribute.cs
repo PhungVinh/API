@@ -40,13 +40,12 @@ namespace AccountManagement.ViewModels
             string token = context.HttpContext.Request.Headers[AccountConstant.Authorization];
             if (!String.IsNullOrEmpty(token))
             {
-                var userName = context.HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value;
                 var acc = new AccountDA(Dis, null, null);
                 try
                 {
                     token = token.Length != 0 ? token.Replace(AccountConstant.BearerReplace, string.Empty) : string.Empty;
                     token = accountCommon.MD5Hash(token);
-                    string str = acc.GetStringAsync(AccountConstant.ListLogoutToken).ToString();
+                    string str = acc.GetStringCache(AccountConstant.ListLogoutToken);
                     if (!string.IsNullOrEmpty(str))
                     {
                         if (str.Contains(token))
