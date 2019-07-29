@@ -917,6 +917,29 @@
         "DurationOfBreak": 10,
         "TimeoutValue": 5000
       }
+    },
+    {
+      "DownstreamPathTemplate": "/api/OrganizationVinh/SearchUserVinhDemo",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50020
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/OrganizationVinh/SearchUserVinhDemo",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
     }
   ],
     "GlobalConfiguration": {

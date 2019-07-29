@@ -1977,6 +1977,447 @@
         "DurationOfBreak": 10,
         "TimeoutValue": 5000
       }
+<<<<<<< Updated upstream
+=======
+    },
+    {
+      "DownstreamPathTemplate": "/api/VOC/GetAllCategory",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50011
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/VOC/GetAllCategory",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/VOC/GetUserAssignee",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50011
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/VOC/GetUserAssignee",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/VOC/SearchVOCProcess",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50011
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/VOC/SearchVOCProcess",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/VOC/AddVOCProcess",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50011
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/VOC/AddVOCProcess",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/VOC/EditVOCProcess",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50011
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/VOC/EditVOCProcess",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "PUT" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/VOC/DeleteVOCProcess/{idVOCProcess}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50011
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/VOC/DeleteVOCProcess/{idVOCProcess}",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "DELETE" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/VOC/CopyVOCProcess",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50011
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/VOC/CopyVOCProcess",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50011
+        }
+
+      ],
+      "DownstreamPathTemplate": "/api/VOC/SearchVersion",
+      "DownstreamScheme": "http",
+      "LoadBalancer": "RoundRobin",
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "UpstreamHttpMethod": [ "GET" ],
+      "UpstreamPathTemplate": "/api/VOC/SearchVersion"
+    },
+    {
+      "DownstreamPathTemplate": "/api/OrganizationVinh/GetPosition",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50020
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/OrganizationVinh/GetPosition",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/OrganizationVinh/GetOrganization",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50020
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/OrganizationVinh/GetOrganization",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/OrganizationVinh/GetAuthority",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50020
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/OrganizationVinh/GetAuthority",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/OrganizationVinh/GetListLogUser",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50020
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/OrganizationVinh/GetListLogUser",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+
+
+    // vinh
+
+
+    {
+      "DownstreamPathTemplate": "/api/OrganizationVinh/AddlogUser",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50020
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/OrganizationVinh/AddlogUser",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "POST" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/OrganizationVinh/UpdateLogUser",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50020
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/OrganizationVinh/UpdateLogUser",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "PUT" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/OrganizationVinh/DeletelogUser",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50020
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/OrganizationVinh/DeletelogUser",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "DELETE" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/OrganizationVinh/GetLogUserList",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50020
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/OrganizationVinh/GetLogUserList",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/OrganizationVinh/SearchLogUser",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50020
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/OrganizationVinh/SearchLogUser",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/OrganizationVinh/SearchCategory",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50020
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/OrganizationVinh/SearchCategory",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/OrganizationVinh/SearchUserVinhDemo",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "192.168.50.51",
+          "Port": 50020
+        }
+
+      ],
+      "UpstreamPathTemplate": "/api/OrganizationVinh/SearchUserVinhDemo",
+      "LoadBalancer": "RoundRobin",
+      "UpstreamHttpMethod": [ "GET" ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10,
+        "TimeoutValue": 5000
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "TestKey",
+        "AllowedScopes": []
+      }
+>>>>>>> Stashed changes
     }
 
   ],
